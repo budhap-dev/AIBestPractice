@@ -83,7 +83,7 @@ export function Section({ info, children }: { info: SectionInfo; children: React
     <section id={info.id} className="section" aria-labelledby={`${info.id}-title`}>
       <header className="section__head">
         <p className="eyebrow">{info.nav}</p>
-        <h2 id={`${info.id}-title`}>{info.title}</h2>
+        <h2 id={`${info.id}-title`} tabIndex={-1}>{info.title}</h2>
         <p className="lede">{info.intro}</p>
       </header>
       {children}

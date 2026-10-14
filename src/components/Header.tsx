@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { meta, searchIndex, type SearchEntry } from '../content'
+import { goTo, href } from '../router'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -45,18 +46,6 @@ function ThemeToggle() {
   )
 }
 
-export function jumpTo(id: string) {
-  const el = document.getElementById(id)
-  if (!el) return
-  history.replaceState(null, '', `#${id}`)
-  el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
-  el.classList.remove('flash')
-  void el.offsetWidth
-  el.classList.add('flash')
-  if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1')
-  el.focus({ preventScroll: true })
-}
-
 function Search() {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
@@ -95,7 +84,7 @@ function Search() {
     setOpen(false)
     setQuery('')
     input.current?.blur()
-    jumpTo(entry.id)
+    goTo(entry.id)
   }
 
   function onKeyDown(ev: React.KeyboardEvent) {
@@ -171,7 +160,7 @@ export function Header({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => 
       <button type="button" className="btn btn--icon topbar__menu" onClick={onMenu} aria-expanded={menuOpen} aria-controls="site-nav" aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
         <svg viewBox="0 0 24 24" aria-hidden="true">{menuOpen ? <path d="M6 6l12 12M18 6 6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}</svg>
       </button>
-      <a className="brand" href="#top">
+      <a className="brand" href={href({ kind: 'home' })}>
         <img src="./favicon.svg" alt="" width="28" height="28" />
         <span>{meta.product}</span>
       </a>
