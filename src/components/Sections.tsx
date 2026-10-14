@@ -59,9 +59,9 @@ export function CheatSheet() {
 
   return (
     <Section info={section('cheat-sheet')}>
-      <div className="seg" role="radiogroup" aria-label="Keyboard shortcuts for">
+      <div className="seg" role="group" aria-label="Keyboard shortcuts for">
         {(['mac', 'win'] as const).map((o) => (
-          <button key={o} type="button" role="radio" aria-checked={os === o} className={os === o ? 'is-on' : undefined} onClick={() => setOs(o)}>
+          <button key={o} type="button" aria-pressed={os === o} className={os === o ? 'is-on' : undefined} onClick={() => setOs(o)}>
             {o === 'mac' ? 'macOS' : 'Windows / Linux'}
           </button>
         ))}
@@ -164,9 +164,9 @@ export function DosDonts() {
 
   return (
     <Section info={section('dos-donts')}>
-      <div className="seg seg--wrap" role="radiogroup" aria-label="Filter by topic">
+      <div className="seg seg--wrap" role="group" aria-label="Filter by topic">
         {(['All', ...RULE_GROUPS] as const).map((g) => (
-          <button key={g} type="button" role="radio" aria-checked={group === g} className={group === g ? 'is-on' : undefined} onClick={() => setGroup(g)}>
+          <button key={g} type="button" aria-pressed={group === g} className={group === g ? 'is-on' : undefined} onClick={() => setGroup(g)}>
             {g}
           </button>
         ))}

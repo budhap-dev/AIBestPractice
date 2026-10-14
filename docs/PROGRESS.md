@@ -1,15 +1,17 @@
 # Progress
-Phase: 1–4 done (PR 1). Next: phase 5 polish + phase 6 docs (PR 2).
+Phase: all phases done (PR 1 app, PR 2 polish + docs).
 
 ## Done
 - Vite + React + TS scaffold, theming (system/light/dark), sticky nav, mobile drawer, search, print cheat sheet.
 - Content in src/content/*.json, verified against official docs on 2026-10-14 (89/94 facts confirmed).
 - Interactive: context meter (per-token cost), quiz, prompt builder, daily checklist, copy buttons.
+- Responsive pass at 375/768/1280 in light and dark; README; VERIFY.md.
 
 ## Decisions
 - Billing is AI credits per token since June 2026; premium requests are legacy. Meter shows cost per model call on the whole window.
 - Edit mode is deprecated: modes are Ask / Plan / Agent.
-- @workspace and suggestion cycling flagged verify: true.
+- @workspace and suggestion cycling flagged verify: true (see VERIFY.md).
 
 ## Next
-- Accessibility + responsive pass at 360/768/1280; README; VERIFY.md.
+- Fill company, owner and policy link in src/content/meta.json.
+- Check the print cheat sheet in a real browser print preview.
