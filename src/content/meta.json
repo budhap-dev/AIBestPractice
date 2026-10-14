@@ -1,0 +1,8 @@
+{
+  "product": "Copilot Field Guide",
+  "company": "[COMPANY]",
+  "owner": "[NAME]",
+  "lastReviewed": "14 Oct 2026",
+  "policyUrl": "",
+  "copilotVersionNote": "Checked against the VS Code and GitHub Copilot docs on 14 Oct 2026. Copilot changes monthly: items marked “Needs verification” are listed in VERIFY.md."
+}
