@@ -21,6 +21,10 @@ Each section has its own page, with previous and next links at the bottom. Pages
 | Security | Approvals, auto-approve, sandboxing, content exclusion and public code. |
 | Beyond the editor | Commit messages, terminal chat, smart actions, PR review and the cloud agent. |
 
+## Themes
+
+The palette button in the top bar sets the appearance (system, light or dark) and one of six accent colours: Teal, Ocean, Grape, Rose, Ember and Graphite. Every colour passes WCAG AA contrast in both appearances. The choice is saved in the browser. Colours are defined in `src/styles.css` under "Colour themes".
+
 ## Run it
 
 Requires Node 24.

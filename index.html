@@ -10,6 +10,8 @@
       try {
         var t = localStorage.getItem('cfg-theme');
         if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+        var p = localStorage.getItem('cfg-palette');
+        if (/^(ocean|grape|rose|ember|graphite)$/.test(p || '')) document.documentElement.dataset.palette = p;
       } catch (e) {}
     </script>
   </head>
