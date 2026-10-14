@@ -111,7 +111,7 @@ function Search() {
   )
 }
 
-export function Header({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => void }) {
+export function Header({ menuOpen, onMenu, presentFrom }: { menuOpen: boolean; onMenu: () => void; presentFrom: number }) {
   return (
     <header className="topbar">
       <button type="button" className="btn btn--icon topbar__menu" onClick={onMenu} aria-expanded={menuOpen} aria-controls="site-nav" aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
@@ -122,6 +122,13 @@ export function Header({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => 
         <span>{meta.product}</span>
       </a>
       <Search />
+      <a className="btn btn--outline btn--sm topbar__present" href={href({ kind: 'present', slide: presentFrom })} title="Presenter mode" aria-label="Present">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="12" rx="2" />
+          <path d="M12 16v4M8 20h8M10 8l4 2-4 2z" />
+        </svg>
+        <span>Present</span>
+      </a>
       <ThemeMenu />
     </header>
   )

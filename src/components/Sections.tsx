@@ -1,6 +1,7 @@
 import { useState, type ReactElement } from 'react'
 import { beyond, commands, contextSources, memoryFiles, meta, modes, rules, section, security, templates, workflow } from '../content'
-import type { CommandGroup, RuleGroup } from '../content/types'
+import { ACTION_LABEL, GROUPS, RULE_GROUPS } from '../content/labels'
+import type { RuleGroup } from '../content/types'
 import { Checklist } from './Checklist'
 import { ContextMeter } from './ContextMeter'
 import { PromptBuilder } from './PromptBuilder'
@@ -44,14 +45,6 @@ export function Modes() {
     </Section>
   )
 }
-
-const GROUPS: { id: CommandGroup; label: string }[] = [
-  { id: 'slash', label: 'Slash commands' },
-  { id: 'context', label: '# context' },
-  { id: 'participant', label: '@ participants' },
-  { id: 'shortcut', label: 'Shortcuts' },
-  { id: 'setting', label: 'Settings & views' },
-]
 
 export function CheatSheet() {
   const [os, setOs] = useState<'mac' | 'win'>(() => (/Mac|iPhone|iPad/.test(navigator.userAgent) ? 'mac' : 'win'))
@@ -114,8 +107,6 @@ export function CheatSheet() {
   )
 }
 
-const ACTION_LABEL = { 'new-chat': 'Start a new chat', summarise: 'Summarise and continue', continue: 'Keep going' }
-
 export function Workflow() {
   return (
     <Section info={section('workflow')}>
@@ -155,8 +146,6 @@ export function Workflow() {
     </Section>
   )
 }
-
-const RULE_GROUPS: RuleGroup[] = ['Context & cost', 'Prompting', 'Reviewing', 'Security']
 
 export function DosDonts() {
   const [group, setGroup] = useState<RuleGroup | 'All'>('All')

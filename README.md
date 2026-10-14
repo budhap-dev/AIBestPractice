@@ -21,6 +21,26 @@ Each section has its own page, with previous and next links at the bottom. Pages
 | Security | Approvals, auto-approve, sandboxing, content exclusion and public code. |
 | Beyond the editor | Commit messages, terminal chat, smart actions, PR review and the cloud agent. |
 
+## Presenter mode
+
+Select **Present** in the top bar, or **Present the guide** on the home page, to run the guide as a slide deck. Starting from a section page opens the deck at that section. The deck is built from the same content files, so it stays in sync with the guide.
+
+Each press of → reveals the next point on a slide, then moves to the next slide. Quiz slides show the options one by one and reveal the answer last.
+
+| Key | Does |
+|---|---|
+| → Space PgDn | Next point or slide |
+| ← Shift+Space PgUp | Previous point or slide |
+| Home / End | First or last slide |
+| O | Overview of all slides |
+| F | Fullscreen |
+| T | Next transition: Slide, Fade, Zoom, Flip |
+| B | Blank the screen |
+| ? | Show the shortcuts |
+| Esc | Leave presenter mode, back to the current section's page |
+
+On touch screens, swipe left or right. The toolbar hides after a few seconds without mouse movement. Slide layouts live in `src/presenter/deck.ts`.
+
 ## Themes
 
 The palette button in the top bar sets the appearance (system, light or dark) and one of six accent colours: Teal, Ocean, Grape, Rose, Ember and Graphite. Every colour passes WCAG AA contrast in both appearances. The choice is saved in the browser. Colours are defined in `src/styles.css` under "Colour themes".
