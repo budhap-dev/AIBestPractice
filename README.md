@@ -6,6 +6,8 @@ It works as a live demo for a team session and as a reference people keep open n
 
 ## What's inside
 
+Each section has its own page, with previous and next links at the bottom. Pages use hash URLs such as `#/cheat-sheet` or `#/cheat-sheet/cmd-compact` for a single item, so links can be shared and old `#cmd-compact` links still work.
+
 | Section | What it covers |
 |---|---|
 | Mental model | What fills the context window, and why every prompt re-sends (and re-bills) all of it. Includes the interactive **context meter**. |
@@ -35,7 +37,7 @@ Other scripts: `npm run build` (type-check and build to `dist/`), `npm run lint`
 
 ## Host it
 
-`npm run build` produces a fully static `dist/` folder with relative paths. Copy it to any internal static host or sub-folder. There's no backend, analytics or external CDN.
+`npm run build` produces a fully static `dist/` folder with relative paths. Routing uses the URL hash, so the host needs no rewrite rules. Copy it to any internal static host or sub-folder. There's no backend, analytics or external CDN.
 
 ## Edit the content
 

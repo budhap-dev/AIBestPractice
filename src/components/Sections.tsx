@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactElement } from 'react'
 import { beyond, commands, contextSources, memoryFiles, meta, modes, rules, section, security, templates, workflow } from '../content'
 import type { CommandGroup, RuleGroup } from '../content/types'
 import { Checklist } from './Checklist'
@@ -293,4 +293,18 @@ export function Beyond() {
       </div>
     </Section>
   )
+}
+
+// One page per section, keyed by the ids in sections.json.
+export const SECTION_PAGES: Record<string, () => ReactElement> = {
+  'mental-model': MentalModel,
+  modes: Modes,
+  'cheat-sheet': CheatSheet,
+  workflow: Workflow,
+  'dos-donts': DosDonts,
+  'team-memory': TeamMemory,
+  templates: Templates,
+  quiz: Practice,
+  security: Security,
+  beyond: Beyond,
 }

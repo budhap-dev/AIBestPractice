@@ -1,69 +1,32 @@
-import { useEffect, useState } from 'react'
 import { sections } from '../content'
-import { jumpTo } from './Header'
+import { href } from '../router'
 
-export function Nav({ open, onNavigate }: { open: boolean; onNavigate: () => void }) {
-  const [active, setActive] = useState(sections[0].id)
+export const PRINT_EVENT = 'cfg:print'
 
-  // The active section is the last one whose top has passed a line 30% down the viewport.
-  useEffect(() => {
-    let frame = 0
-    const update = () => {
-      frame = 0
-      const line = window.innerHeight * 0.3
-      let current = sections[0].id
-      for (const s of sections) {
-        const el = document.getElementById(s.id)
-        if (el && el.getBoundingClientRect().top <= line) current = s.id
-      }
-      setActive(current)
-    }
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update)
-    }
-    update()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-    }
-  }, [])
-
+export function Nav({ open, current, onNavigate }: { open: boolean; current: string; onNavigate: () => void }) {
   return (
     <nav id="site-nav" className={`sidenav${open ? ' sidenav--open' : ''}`} aria-label="Sections">
+      <a className={`sidenav__home${current === 'home' ? ' is-current' : ''}`} href={href({ kind: 'home' })} aria-current={current === 'home' ? 'page' : undefined} onClick={onNavigate}>
+        Overview
+      </a>
       <ol>
         {sections.map((s, i) => (
           <li key={s.id}>
-            <a
-              href={`#${s.id}`}
-              aria-current={active === s.id ? 'location' : undefined}
-              onClick={(e) => {
-                e.preventDefault()
-                onNavigate()
-                jumpTo(s.id)
-              }}
-            >
+            <a href={href({ kind: 'section', id: s.id })} aria-current={current === s.id ? 'page' : undefined} onClick={onNavigate}>
               <span className="sidenav__num">{String(i + 1).padStart(2, '0')}</span>
               {s.nav}
             </a>
           </li>
         ))}
       </ol>
-      <button type="button" className="btn btn--ghost btn--sm sidenav__print" onClick={() => printCheatSheet()}>
+      <button type="button" className="btn btn--ghost btn--sm sidenav__print" onClick={printCheatSheet}>
         Print cheat sheet
       </button>
     </nav>
   )
 }
 
+// The cheat sheet and the do's and don'ts live on separate pages, so the app renders a print view first.
 export function printCheatSheet() {
-  document.body.classList.add('print-cheatsheet')
-  const done = () => {
-    document.body.classList.remove('print-cheatsheet')
-    window.removeEventListener('afterprint', done)
-  }
-  window.addEventListener('afterprint', done)
-  window.print()
+  window.dispatchEvent(new Event(PRINT_EVENT))
 }
