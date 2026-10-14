@@ -6,18 +6,18 @@ export function Home() {
     <section className="hero" id="top" aria-labelledby="hero-title">
       <p className="eyebrow">{meta.company} · Engineering</p>
       <h1 id="hero-title" tabIndex={-1}>
-        Get more from GitHub Copilot, every day.
+        {meta.headline}
       </h1>
-      <p className="hero__lede">
-        Short, practical habits for VS Code: keep the context focused, spend AI credits wisely, write prompts that land, and review everything before it
-        ships.
-      </p>
+      <p className="hero__lede">{meta.tagline}</p>
       <div className="hero__cta">
         <a className="btn btn--primary" href={href({ kind: 'section', id: 'workflow' })}>
           Start with the daily workflow
         </a>
         <a className="btn btn--outline" href={href({ kind: 'section', id: 'cheat-sheet' })}>
           Open the cheat sheet
+        </a>
+        <a className="btn btn--ghost" href={href({ kind: 'present', slide: 1 })}>
+          Present the guide
         </a>
       </div>
       <h2 className="hero__toc-title">In this guide</h2>

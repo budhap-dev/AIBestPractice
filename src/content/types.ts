@@ -11,6 +11,10 @@ export interface Item {
 
 export interface Meta {
   product: string
+  headline: string
+  tagline: string
+  // Last line of the presenter deck.
+  closing: string
   company: string
   owner: string
   lastReviewed: string

@@ -6,9 +6,11 @@ import { Nav, printCheatSheet, PRINT_EVENT } from './components/Nav'
 import { Pager } from './components/Pager'
 import { CheatSheet, DosDonts, SECTION_PAGES } from './components/Sections'
 import { ToastProvider } from './components/ui'
+import { Presenter } from './presenter/Presenter'
+import { sectionStart } from './presenter/deck'
 import { parse, upgradeLegacyHash, useLocation } from './router'
 
-const order = (key: string) => (key === 'home' ? -1 : sections.findIndex((s) => s.id === key))
+const order = (key: string) => sections.findIndex((s) => s.id === key)
 
 function usePrintMode() {
   const [printing, setPrinting] = useState(false)
@@ -39,7 +41,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { hash, tick } = useLocation()
   const route = parse(hash)
-  const pageKey = route.kind === 'section' ? route.id : 'home'
+  const pageKey = route.kind === 'section' ? route.id : route.kind
   const item = route.kind === 'section' ? route.item : undefined
   const printing = usePrintMode()
   const firstRender = useRef(true)
@@ -58,12 +60,14 @@ export default function App() {
   }, [menuOpen])
 
   useEffect(() => {
+    if (pageKey === 'present') return
     const info = sections.find((s) => s.id === pageKey)
     document.title = info ? `${info.nav} · ${meta.product}` : meta.product
   }, [pageKey])
 
   // After each navigation: scroll to the item (and highlight it), or to the top of the new page.
   useEffect(() => {
+    if (pageKey === 'present') return
     const initial = firstRender.current
     firstRender.current = false
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -84,6 +88,15 @@ export default function App() {
   }, [pageKey, item, tick])
 
   const Page = route.kind === 'section' ? SECTION_PAGES[route.id] : null
+  const presentFrom = route.kind === 'section' ? sectionStart(route.id) + 1 : 1
+
+  if (route.kind === 'present') {
+    return (
+      <ToastProvider>
+        <Presenter slide={route.slide} />
+      </ToastProvider>
+    )
+  }
 
   return (
     <ToastProvider>
@@ -97,7 +110,7 @@ export default function App() {
       >
         Skip to content
       </a>
-      <Header menuOpen={menuOpen} onMenu={() => setMenuOpen((o) => !o)} />
+      <Header menuOpen={menuOpen} onMenu={() => setMenuOpen((o) => !o)} presentFrom={presentFrom} />
       <div className="layout">
         <Nav open={menuOpen} current={pageKey} onNavigate={() => setMenuOpen(false)} />
         {menuOpen && <div className="scrim" onClick={() => setMenuOpen(false)} aria-hidden="true" />}

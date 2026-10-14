@@ -392,6 +392,17 @@ pre {
   color: var(--text);
 }
 
+/* ---------- Present button ---------- */
+.topbar__present svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* ---------- Theme menu ---------- */
 .theme-menu {
   position: relative;
@@ -1870,8 +1881,18 @@ main {
 }
 
 @media (max-width: 640px) {
-  .brand span {
+  .brand span,
+  .topbar__present span {
     display: none;
+  }
+
+  .topbar__present {
+    width: 40px;
+    min-height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-color: transparent;
+    background: none;
   }
 
   .search__hint {

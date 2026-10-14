@@ -1,5 +1,8 @@
 {
   "product": "Copilot Field Guide",
+  "headline": "Get more from GitHub Copilot, every day.",
+  "tagline": "Short, practical habits for VS Code: keep the context focused, spend AI credits wisely, write prompts that land, and review everything before it ships.",
+  "closing": "Keep the guide open next to your editor, and come back to the cheat sheet whenever you need it.",
   "company": "[COMPANY]",
   "owner": "[NAME]",
   "lastReviewed": "14 Oct 2026",
