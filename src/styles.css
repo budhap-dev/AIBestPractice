@@ -1,7 +1,8 @@
 /* ---------- Tokens ---------- */
 :root {
   color-scheme: light;
-  --bg: #f7f8fa;
+  --bg-base: #f7f8fa;
+  --bg: color-mix(in srgb, var(--accent) 4%, var(--bg-base));
   --surface: #ffffff;
   --surface-2: #f1f3f6;
   --surface-3: #e7eaef;
@@ -38,7 +39,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --bg: #0e1116;
+    --bg-base: #0e1116;
     --surface: #151a21;
     --surface-2: #1b212a;
     --surface-3: #242b36;
@@ -69,7 +70,7 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0e1116;
+  --bg-base: #0e1116;
   --surface: #151a21;
   --surface-2: #1b212a;
   --surface-3: #242b36;
@@ -97,6 +98,50 @@
   --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
 }
 
+/* ---------- Colour themes ----------
+   Each palette swaps the accent family; light-dark() picks the value for the active appearance. */
+:root[data-palette='ocean'] {
+  --accent: light-dark(#1d4ed8, #60a5fa);
+  --accent-strong: light-dark(#1e40af, #93c5fd);
+  --accent-soft: light-dark(#e8eefc, #12223d);
+  --on-accent: light-dark(#ffffff, #06142b);
+}
+
+:root[data-palette='grape'] {
+  --accent: light-dark(#6d28d9, #a78bfa);
+  --accent-strong: light-dark(#5b21b6, #c4b5fd);
+  --accent-soft: light-dark(#f0eafd, #221a3b);
+  --on-accent: light-dark(#ffffff, #160b30);
+}
+
+:root[data-palette='rose'] {
+  --accent: light-dark(#be123c, #fb7185);
+  --accent-strong: light-dark(#9f1239, #fda4af);
+  --accent-soft: light-dark(#fdebef, #36131b);
+  --on-accent: light-dark(#ffffff, #2a0710);
+}
+
+:root[data-palette='ember'] {
+  --accent: light-dark(#c2410c, #fb923c);
+  --accent-strong: light-dark(#9a3412, #fdba74);
+  --accent-soft: light-dark(#fdeee3, #34200f);
+  --on-accent: light-dark(#ffffff, #2a1204);
+}
+
+:root[data-palette='graphite'] {
+  --accent: light-dark(#334155, #cbd5e1);
+  --accent-strong: light-dark(#1e293b, #e2e8f0);
+  --accent-soft: light-dark(#eceff3, #232a35);
+  --on-accent: light-dark(#ffffff, #0f141b);
+}
+
+/* Theme changes reveal as a growing circle (see theme.ts); the default cross-fade is switched off. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 /* ---------- Base ---------- */
 *,
 *::before,
@@ -112,6 +157,7 @@ html {
 body {
   margin: 0;
   background: var(--bg);
+  transition: background-color 0.3s;
   color: var(--text);
   font: 16px/1.6 var(--font);
   -webkit-font-smoothing: antialiased;
@@ -346,6 +392,98 @@ pre {
   color: var(--text);
 }
 
+/* ---------- Theme menu ---------- */
+.theme-menu {
+  position: relative;
+}
+
+.theme-menu__panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 50;
+  width: 272px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.18);
+  transform-origin: top right;
+  animation: pop 0.18s cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(-4px);
+  }
+}
+
+.theme-menu__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 0 0 6px;
+}
+
+.theme-menu__modes {
+  display: flex;
+  margin-bottom: 14px;
+}
+
+.theme-menu__modes button {
+  flex: 1;
+}
+
+.theme-menu__swatches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.swatch:hover {
+  background: var(--surface-2);
+}
+
+.swatch[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.swatch__chip {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--sw-a) 50%, var(--sw-b) 50%);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
+}
+
+[data-swatch='teal'] { --sw-a: #0f766e; --sw-b: #2dd4bf; }
+[data-swatch='ocean'] { --sw-a: #1d4ed8; --sw-b: #60a5fa; }
+[data-swatch='grape'] { --sw-a: #6d28d9; --sw-b: #a78bfa; }
+[data-swatch='rose'] { --sw-a: #be123c; --sw-b: #fb7185; }
+[data-swatch='ember'] { --sw-a: #c2410c; --sw-b: #fb923c; }
+[data-swatch='graphite'] { --sw-a: #334155; --sw-b: #cbd5e1; }
+
 /* ---------- Search ---------- */
 .search {
   position: relative;
@@ -529,8 +667,21 @@ main:focus {
 
 /* ---------- Hero ---------- */
 .hero {
+  position: relative;
+  isolation: isolate;
   padding: clamp(40px, 7vw, 80px) 0 clamp(24px, 4vw, 40px);
   border-bottom: 1px solid var(--border);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -40px 0 auto auto;
+  width: min(520px, 80%);
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 16%, transparent), transparent);
+  pointer-events: none;
 }
 
 .hero h1 {

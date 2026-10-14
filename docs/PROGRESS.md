@@ -8,6 +8,7 @@ Phase: all phases done (PR 1 app, PR 2 polish + docs).
 - Responsive pass at 375/768/1280 in light and dark; README; VERIFY.md.
 
 ## Decisions
+- Themes: appearance + 6 accent palettes via data-palette and light-dark(); circular view-transition reveal.
 - One page per section with hash routing (#/section/item); legacy #id links redirect. Print view renders cheat sheet + do's and don'ts.
 - Billing is AI credits per token since June 2026; premium requests are legacy. Meter shows cost per model call on the whole window.
 - Edit mode is deprecated: modes are Ask / Plan / Agent.
