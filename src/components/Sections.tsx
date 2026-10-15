@@ -1,7 +1,7 @@
 import { useState, type CSSProperties, type ReactElement } from 'react'
-import { beyond, commands, contextSources, glossary, memoryFiles, meta, modes, rules, section, sections, security, takeaways, templates, workflow } from '../content'
+import { beyond, commands, contextSources, glossary, memoryFiles, meta, modes, opening, rules, section, sections, security, takeaways, templates, workflow } from '../content'
 import { ACTION_LABEL, GROUPS, RULE_GROUPS } from '../content/labels'
-import type { RuleGroup } from '../content/types'
+import type { Finding, RuleGroup, TermGroup } from '../content/types'
 import { href } from '../router'
 import { Checklist } from './Checklist'
 import { celebrate } from './confetti'
@@ -12,31 +12,116 @@ import { RichText } from './RichText'
 import { Diagram } from './Diagrams'
 import { CodeBlock, CopyButton, Kbd, Section, Source, useToast } from './ui'
 
+function Findings({ list, tone }: { list: Finding[]; tone: 'up' | 'down' }) {
+  return (
+    <div className={`findings findings--${tone}`}>
+      {list.map((f) => (
+        <article key={f.id} id={f.id} className="card finding">
+          <p className="finding__figure">{f.figure}</p>
+          <h4>{f.title}</h4>
+          <p>{f.body}</p>
+          <p className="finding__source">
+            <a href={f.sourceUrl} target="_blank" rel="noreferrer">
+              {f.source}
+              <span className="visually-hidden"> (opens in a new tab)</span>
+            </a>
+          </p>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+export function Opening() {
+  return (
+    <Section info={section('why')}>
+      <h3 className="subhead">How a feature used to get built</h3>
+      <p className="muted">
+        Take one ordinary feature: <strong>{opening.feature.toLowerCase()}</strong>. {opening.thenNote}
+      </p>
+      <ol className="then">
+        {opening.then.map((s, i) => (
+          <li key={s.id} id={s.id} className="then__step" style={{ '--i': i } as CSSProperties}>
+            <span className="then__num" aria-hidden="true">
+              {i + 1}
+            </span>
+            <div>
+              <h4>{s.title}</h4>
+              <p>{s.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <h3 className="subhead">Then and now</h3>
+      <Diagram id="then-now" />
+      <h3 className="subhead">What the research says</h3>
+      <Findings list={opening.research} tone="up" />
+      <h3 className="subhead">The catch</h3>
+      <Findings list={opening.catch} tone="down" />
+      <h3 className="subhead">What decides which side you land on</h3>
+      <ol className="factors">
+        {opening.factors.map((f) => (
+          <li key={f.id} id={f.id} className="card factor">
+            <h4>{f.title}</h4>
+            <p>
+              <RichText text={f.body} />
+            </p>
+            <a href={href({ kind: 'section', id: f.section })}>
+              {sections.find((s) => s.id === f.section)?.nav}
+              <span aria-hidden="true"> →</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+      <p className="callout handover">{opening.handover}</p>
+    </Section>
+  )
+}
+
+const TERM_GROUPS: { id: TermGroup; label: string; intro: string }[] = [
+  { id: 'ai', label: 'AI words', intro: 'The ideas behind every AI assistant, not just Copilot.' },
+  { id: 'copilot', label: 'Copilot words', intro: 'Names for the parts of Copilot in VS Code you will meet in this guide.' },
+  { id: 'code', label: 'Coding words', intro: 'Everyday words for developers, in case one is new.' },
+]
+
 export function KeyTerms() {
   return (
     <Section info={section('key-terms')}>
       <h3 className="subhead">What happens when you press Enter</h3>
       <Diagram id="request" />
-      <h3 className="subhead">The words, in plain English</h3>
-      <dl className="terms">
-        {glossary.map((t) => (
-          <div key={t.id} id={t.id} className="card term">
-            <dt>
-              <dfn>{t.title}</dfn>
-            </dt>
-            <dd>
-              <p>
-                <RichText text={t.body} />
-              </p>
-              <p className="term__analogy">
-                <span>Think of it as</span> {t.analogy}
-              </p>
-              {t.sourceUrl && <Source item={t} />}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      {TERM_GROUPS.map((g) => (
+        <TermList key={g.id} group={g} />
+      ))}
     </Section>
+  )
+}
+
+function TermList({ group }: { group: (typeof TERM_GROUPS)[number] }) {
+  return (
+    <>
+      <h3 className="subhead">{group.label}</h3>
+      <p className="muted">{group.intro}</p>
+      <dl className="terms">
+        {glossary
+          .filter((t) => t.group === group.id)
+          .map((t) => (
+            <div key={t.id} id={t.id} className="card term">
+              <dt>
+                <dfn>{t.title}</dfn>
+              </dt>
+              <dd>
+                <p>
+                  <RichText text={t.body} />
+                </p>
+                <p className="term__analogy">
+                  <span>Think of it as</span> {t.analogy}
+                </p>
+                {t.sourceUrl && <Source item={t} />}
+              </dd>
+            </div>
+          ))}
+      </dl>
+    </>
   )
 }
 
@@ -53,6 +138,8 @@ export function MentalModel() {
           </article>
         ))}
       </div>
+      <h3 className="subhead">The whiteboard fills up as you chat</h3>
+      <Diagram id="context-stack" />
       <ContextMeter />
     </Section>
   )
@@ -99,6 +186,8 @@ export function CheatSheet() {
 
   return (
     <Section info={section('cheat-sheet')}>
+      <h3 className="subhead">Three characters to know</h3>
+      <Diagram id="prefixes" />
       <div className="seg" role="group" aria-label="Keyboard shortcuts for">
         {(['mac', 'win'] as const).map((o) => (
           <button key={o} type="button" aria-pressed={os === o} className={os === o ? 'is-on' : undefined} onClick={() => setOs(o)}>
@@ -157,6 +246,7 @@ export function CheatSheet() {
 export function Workflow() {
   return (
     <Section info={section('workflow')}>
+      <Diagram id="daily-loop" />
       <ol className="steps">
         {workflow.steps.map((s, i) => (
           <li key={s.id} id={s.id} className="step">
@@ -294,6 +384,8 @@ export function Practice() {
 export function Security() {
   return (
     <Section info={section('security')}>
+      <h3 className="subhead">The approval gate</h3>
+      <Diagram id="approval" />
       <div className="grid grid--2">
         {security.map((s) => (
           <article key={s.id} id={s.id} className="card card--tight">
@@ -376,6 +468,7 @@ export function WrapUp() {
 
 // One page per section, keyed by the ids in sections.json.
 export const SECTION_PAGES: Record<string, () => ReactElement> = {
+  why: Opening,
   'key-terms': KeyTerms,
   'mental-model': MentalModel,
   'prompt-cost': PromptCost,

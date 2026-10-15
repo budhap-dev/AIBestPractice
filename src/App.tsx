@@ -7,7 +7,8 @@ import { Pager } from './components/Pager'
 import { CheatSheet, DosDonts, SECTION_PAGES } from './components/Sections'
 import { ToastProvider } from './components/ui'
 import { Presenter } from './presenter/Presenter'
-import { sectionStart } from './presenter/deck'
+import { readLength } from './presenter/controls'
+import { deckFor, sectionStart } from './presenter/deck'
 import { parse, upgradeLegacyHash, useLocation } from './router'
 
 const order = (key: string) => sections.findIndex((s) => s.id === key)
@@ -88,7 +89,8 @@ export default function App() {
   }, [pageKey, item, tick])
 
   const Page = route.kind === 'section' ? SECTION_PAGES[route.id] : null
-  const presentFrom = route.kind === 'section' ? sectionStart(route.id) + 1 : 1
+  // Present from this section in whichever deck was used last: the short talk or the full deck.
+  const presentFrom = route.kind === 'section' ? sectionStart(route.id, deckFor(readLength())) + 1 : 1
 
   if (route.kind === 'present') {
     return (

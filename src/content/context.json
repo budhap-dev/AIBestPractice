@@ -34,7 +34,7 @@
   {
     "id": "ctx-billing",
     "title": "You pay per token",
-    "body": "Copilot bills in GitHub AI credits, based on the model and the tokens used (input, output and cached). An agent task is charged for every model call it makes. Code completions and next edit suggestions are not billed in credits on paid plans.",
+    "body": "Copilot bills in GitHub AI credits, based on the model and the tokens used (input, output and cached). An agent task is charged for every model call it makes. Inline suggestions as you type are not billed in credits on paid plans.",
     "example": "The same question costs more in a bloated chat than in a fresh one.",
     "tags": ["billing", "credits", "tokens", "cost"],
     "sourceUrl": "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals"

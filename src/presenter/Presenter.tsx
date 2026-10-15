@@ -3,24 +3,11 @@ import { meta, sections } from '../content'
 import { celebrate } from '../components/confetti'
 import { ThemeMenu } from '../components/ThemeMenu'
 import { navigate } from '../router'
-import { deck, deckSeconds, formatDuration, secondsFrom, slideSeconds } from './deck'
+import { deckFor, formatDuration, fullDeck, indexIn, secondsFrom, slideSeconds, totalSeconds, type Length, type Slide } from './deck'
+import { DESIGNS, DeckControlsContext, LENGTHS, TRANSITIONS, readLength, saveLength, type Design, type Transition } from './controls'
 import { SlideView } from './Slide'
 import './presenter.css'
 
-const TRANSITIONS = [
-  { id: 'slide', label: 'Slide' },
-  { id: 'fade', label: 'Fade' },
-  { id: 'zoom', label: 'Zoom' },
-  { id: 'flip', label: 'Flip' },
-  { id: 'page', label: 'Page turn' },
-  { id: 'cube', label: 'Cube' },
-  { id: 'wipe', label: 'Wipe' },
-  { id: 'circle', label: 'Circle' },
-  { id: 'rise', label: 'Rise' },
-  { id: 'random', label: 'Random' },
-] as const
-
-type Transition = (typeof TRANSITIONS)[number]['id']
 type Effect = Exclude<Transition, 'random'>
 
 const EFFECTS = TRANSITIONS.map((t) => t.id).filter((id): id is Effect => id !== 'random')
@@ -33,8 +20,7 @@ const randomEffect = (not: Effect) => {
 type Overlay = 'none' | 'overview' | 'help'
 
 const TRANSITION_KEY = 'cfg-transition'
-const LAST = deck.length - 1
-const clamp = (n: number) => Math.min(Math.max(n, 0), LAST)
+const DESIGN_KEY = 'cfg-design'
 const navOf = (id?: string) => sections.find((s) => s.id === id)?.nav
 
 const SHORTCUTS: [string, string][] = [
@@ -42,8 +28,10 @@ const SHORTCUTS: [string, string][] = [
   ['←  Shift+Space  PgUp', 'Previous point or slide'],
   ['Home  End', 'First or last slide'],
   ['O', 'Overview of all slides'],
+  ['S', 'Switch between the short talk and the full deck'],
   ['F', 'Fullscreen'],
   ['T', 'Next transition style'],
+  ['D', 'Next slide design'],
   ['B', 'Blank the screen'],
   ['?', 'Show these shortcuts'],
   ['Esc', 'Close a panel, or leave presenter mode'],
@@ -58,13 +46,35 @@ function readTransition(): Transition {
   }
 }
 
+function readDesign(): Design {
+  try {
+    const d = localStorage.getItem(DESIGN_KEY)
+    return DESIGNS.some((x) => x.id === d) ? (d as Design) : 'classic'
+  } catch {
+    return 'classic'
+  }
+}
+
+function save(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    // Storage blocked: the choice lasts for this visit.
+  }
+}
+
 export function Presenter({ slide }: { slide: number }) {
+  const [length, setLength] = useState<Length>(readLength)
+  const deck = deckFor(length)
+  const LAST = deck.length - 1
+  const clamp = (n: number) => Math.min(Math.max(n, 0), LAST)
   const index = clamp(slide - 1)
   const [pos, setPos] = useState({ index, step: 0, dir: 1 })
-  const [leaving, setLeaving] = useState<{ index: number; step: number; key: number } | null>(null)
+  const [leaving, setLeaving] = useState<{ slide: Slide; number: number; step: number; key: number } | null>(null)
   const [overlay, setOverlay] = useState<Overlay>('none')
   const [blank, setBlank] = useState(false)
   const [transition, setTransition] = useState<Transition>(readTransition)
+  const [design, setDesign] = useState<Design>(readDesign)
   const [effect, setEffect] = useState<Effect>('slide')
   const [idle, setIdle] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
@@ -87,7 +97,7 @@ export function Presenter({ slide }: { slide: number }) {
     }
     leaveKey.current += 1
     if (transition === 'random') setEffect(randomEffect(effect))
-    setLeaving({ index, step, key: leaveKey.current })
+    setLeaving({ slide: current, number: index + 1, step, key: leaveKey.current })
     setPos({ index: to, step: toStep, dir: to > index ? 1 : -1 })
     navigate({ kind: 'present', slide: to + 1 }, { replace: true })
   }
@@ -99,7 +109,7 @@ export function Presenter({ slide }: { slide: number }) {
       if (current.kind === 'quiz' && step + 1 === current.steps) celebrate()
     } else if (index < LAST) {
       go(index + 1, 0)
-      if (deck[index + 1].kind === 'end') celebrate({ size: 'big' })
+      if (deck[index + 1].kind === 'end' || index + 1 === LAST) celebrate({ size: 'big' })
     }
   }
   const prev = () => (step > 0 ? go(index, step - 1) : index > 0 && go(index - 1, deck[index - 1].steps))
@@ -114,6 +124,17 @@ export function Presenter({ slide }: { slide: number }) {
     else void document.documentElement.requestFullscreen?.().catch(() => {})
   }
 
+  // Switch between the short talk and the full deck, staying on the same slide (or the next one in the talk).
+  function chooseLength(l: Length, at = current.id) {
+    if (l === length && at === current.id) return
+    const to = indexIn(deckFor(l), at)
+    setLength(l)
+    saveLength(l)
+    setBlank(false)
+    setPos({ index: to, step: 0, dir: pos.dir })
+    navigate({ kind: 'present', slide: to + 1 }, { replace: true })
+  }
+
   function cycleTransition() {
     const i = TRANSITIONS.findIndex((t) => t.id === transition)
     chooseTransition(TRANSITIONS[(i + 1) % TRANSITIONS.length].id)
@@ -121,11 +142,17 @@ export function Presenter({ slide }: { slide: number }) {
 
   function chooseTransition(t: Transition) {
     setTransition(t)
-    try {
-      localStorage.setItem(TRANSITION_KEY, t)
-    } catch {
-      // Storage blocked: the choice lasts for this visit.
-    }
+    save(TRANSITION_KEY, t)
+  }
+
+  function chooseDesign(d: Design) {
+    setDesign(d)
+    save(DESIGN_KEY, d)
+  }
+
+  function cycleDesign() {
+    const i = DESIGNS.findIndex((d) => d.id === design)
+    chooseDesign(DESIGNS[(i + 1) % DESIGNS.length].id)
   }
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
@@ -183,6 +210,14 @@ export function Presenter({ slide }: { slide: number }) {
       case 'T':
         cycleTransition()
         break
+      case 'd':
+      case 'D':
+        cycleDesign()
+        break
+      case 's':
+      case 'S':
+        chooseLength(length === 'short' ? 'full' : 'short')
+        break
       case 'b':
       case 'B':
       case '.':
@@ -232,177 +267,225 @@ export function Presenter({ slide }: { slide: number }) {
 
   useEffect(() => {
     document.title = `${index + 1}/${deck.length} · ${current.title} · ${meta.product}`
-  }, [index, current.title])
+  }, [index, current.title, deck.length])
 
   const progress = (index + (current.steps ? step / (current.steps + 1) : 0)) / LAST
 
   return (
-    <div
-      ref={root}
-      className={`presenter${idle && overlay === 'none' ? ' is-idle' : ''}`}
-      data-transition={transition === 'random' ? effect : transition}
-      data-dir={pos.dir > 0 ? 'next' : 'prev'}
-      style={{ '--dir': pos.dir } as CSSProperties}
-      tabIndex={-1}
-      role="region"
-      aria-label="Presenter mode"
-      aria-roledescription="slide deck"
-      onPointerDown={(e) => {
-        if (e.pointerType !== 'mouse') swipe.current = { x: e.clientX, y: e.clientY }
-      }}
-      onPointerUp={(e) => {
-        const start = swipe.current
-        swipe.current = null
-        if (!start) return
-        const dx = e.clientX - start.x
-        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
-          if (dx < 0) next()
-          else prev()
-        }
-      }}
-    >
-      <div className="presenter__bar presenter__bar--top">
-        <p className="presenter__where">
-          <span className="presenter__product">{meta.product}</span>
-          {current.section && <span className="presenter__section">{navOf(current.section)}</span>}
-        </p>
-        <div className="presenter__tools">
-          <label className="presenter__select">
-            <span className="visually-hidden">Transition</span>
-            <select value={transition} onChange={(e) => chooseTransition(e.target.value as Transition)} title="Transition (T)">
-              {TRANSITIONS.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <ThemeMenu />
-          <button type="button" className="btn btn--icon" onClick={() => setOverlay('overview')} aria-label="Overview of all slides (O)" title="Overview (O)">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="3" y="3" width="7" height="7" rx="1.5" />
-              <rect x="14" y="3" width="7" height="7" rx="1.5" />
-              <rect x="3" y="14" width="7" height="7" rx="1.5" />
-              <rect x="14" y="14" width="7" height="7" rx="1.5" />
-            </svg>
-          </button>
-          <button type="button" className="btn btn--icon" onClick={toggleFullscreen} aria-label={fullscreen ? 'Exit fullscreen (F)' : 'Fullscreen (F)'} title="Fullscreen (F)">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              {fullscreen ? <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" /> : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />}
-            </svg>
-          </button>
-          <button type="button" className="btn btn--icon" onClick={() => setOverlay('help')} aria-label="Keyboard shortcuts (?)" title="Shortcuts (?)">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="2" y="6" width="20" height="12" rx="2" />
-              <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10" />
-            </svg>
-          </button>
-          <button type="button" className="btn btn--outline btn--sm presenter__exit" onClick={exit}>
-            Exit
-            <kbd>Esc</kbd>
-          </button>
-        </div>
-      </div>
-
-      <div className="presenter__stage">
-        {leaving && (
-          <section
-            key={`leave-${leaving.key}`}
-            className="slide slide--leave"
-            aria-hidden="true"
-            inert
-            onAnimationEnd={(e) => e.target === e.currentTarget && setLeaving(null)}
-          >
-            <SlideView slide={deck[leaving.index]} step={leaving.step} />
-          </section>
-        )}
-        <section key={index} className="slide slide--enter" aria-roledescription="slide" aria-label={`${index + 1} of ${deck.length}: ${current.title}`}>
-          <SlideView slide={current} step={step} />
-        </section>
-        {blank && <div className="presenter__blank" onClick={() => setBlank(false)} aria-hidden="true" />}
-      </div>
-
-      <p className="visually-hidden" aria-live="polite">
-        Slide {index + 1} of {deck.length}: {current.title}. About {formatDuration(slideSeconds(current))} to read
-        {current.steps > 0 && step < current.steps ? `. ${current.steps - step} more points.` : ''}
-      </p>
-
-      <div className="presenter__bar presenter__bar--bottom">
-        <div className="presenter__progress" aria-hidden="true">
-          <span className="presenter__progress-fill" style={{ transform: `scaleX(${progress})` }} />
-          {sections.map((s) => {
-            const at = deck.findIndex((d) => d.kind === 'section' && d.section === s.id)
-            return <span key={s.id} className="presenter__tick" style={{ left: `${(at / LAST) * 100}%` }} />
-          })}
-        </div>
-        <div className="presenter__nav">
-          <span className="presenter__time" title={`Estimated time to read this slide. About ${formatDuration(secondsFrom(index))} of reading left.`}>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 7v5l3 2" />
-            </svg>
-            <span>{formatDuration(slideSeconds(current))} read</span>
-            <span className="presenter__left">· {formatDuration(secondsFrom(index))} left</span>
-          </span>
-          <button type="button" className="btn btn--icon" onClick={prev} disabled={index === 0 && step === 0} aria-label="Previous">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          </button>
-          <span className="presenter__count">
-            {index + 1} / {deck.length}
-          </span>
-          <button type="button" className="btn btn--icon" onClick={next} disabled={index === LAST && step === current.steps} aria-label="Next">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {overlay === 'overview' && (
-        <Overview
-          current={index}
-          onPick={(i) => {
-            setOverlay('none')
-            go(i, 0)
-            root.current?.focus({ preventScroll: true })
-          }}
-          onClose={() => {
-            setOverlay('none')
-            root.current?.focus({ preventScroll: true })
-          }}
-        />
-      )}
-      {overlay === 'help' && (
-        <div className="presenter__overlay" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onClick={() => setOverlay('none')}>
-          <div className="presenter__help" onClick={(e) => e.stopPropagation()}>
-            <h2>Keyboard shortcuts</h2>
-            <dl>
-              {SHORTCUTS.map(([keys, what]) => (
-                <div key={keys}>
-                  <dt>
-                    {keys.split('  ').map((k) => (
-                      <kbd key={k}>{k}</kbd>
-                    ))}
-                  </dt>
-                  <dd>{what}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="muted">On a touch screen, swipe left or right.</p>
-            <button type="button" className="btn btn--primary" onClick={() => setOverlay('none')} autoFocus>
-              Got it
+    <DeckControlsContext.Provider value={{ slides: deck, length, transition, setTransition: chooseTransition, design, setDesign: chooseDesign }}>
+      <div
+        ref={root}
+        data-design={design}
+        className={`presenter${idle && overlay === 'none' ? ' is-idle' : ''}`}
+        data-transition={transition === 'random' ? effect : transition}
+        data-dir={pos.dir > 0 ? 'next' : 'prev'}
+        style={{ '--dir': pos.dir } as CSSProperties}
+        tabIndex={-1}
+        role="region"
+        aria-label="Presenter mode"
+        aria-roledescription="slide deck"
+        onPointerDown={(e) => {
+          if (e.pointerType !== 'mouse') swipe.current = { x: e.clientX, y: e.clientY }
+        }}
+        onPointerUp={(e) => {
+          const start = swipe.current
+          swipe.current = null
+          if (!start) return
+          const dx = e.clientX - start.x
+          if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
+            if (dx < 0) next()
+            else prev()
+          }
+        }}
+      >
+        <div className="presenter__bar presenter__bar--top">
+          <p className="presenter__where">
+            <span className="presenter__product">{meta.product}</span>
+            {current.section && <span className="presenter__section">{navOf(current.section)}</span>}
+          </p>
+          <div className="presenter__tools">
+            <div className="presenter__pickers">
+              <label className="presenter__select" title="Short talk or full deck (S)">
+                <svg className="presenter__select-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 6h16M4 12h10M4 18h6" />
+                </svg>
+                <span className="visually-hidden">Slides to present</span>
+                <select value={length} onChange={(e) => chooseLength(e.target.value as Length)}>
+                  {LENGTHS.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.label} ({deckFor(l.id).length})
+                    </option>
+                  ))}
+                </select>
+                <svg className="presenter__chevron" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </label>
+              <label className="presenter__select" title="Slide design (D)">
+                <svg className="presenter__select-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M3 9h18M8 13h8M8 16h5" />
+                </svg>
+                <span className="visually-hidden">Slide design</span>
+                <select value={design} onChange={(e) => chooseDesign(e.target.value as Design)}>
+                  {DESIGNS.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+                <svg className="presenter__chevron" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </label>
+              <label className="presenter__select" title="Transition (T)">
+                <svg className="presenter__select-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="2" y="6" width="12" height="12" rx="2" />
+                  <path d="M17 6h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3M14 12h5m-2-2 2 2-2 2" />
+                </svg>
+                <span className="visually-hidden">Transition</span>
+                <select value={transition} onChange={(e) => chooseTransition(e.target.value as Transition)}>
+                  {TRANSITIONS.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+                <svg className="presenter__chevron" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </label>
+            </div>
+            <ThemeMenu />
+            <button type="button" className="btn btn--icon" onClick={() => setOverlay('overview')} aria-label="Overview of all slides (O)" title="Overview (O)">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" />
+              </svg>
+            </button>
+            <button type="button" className="btn btn--icon" onClick={toggleFullscreen} aria-label={fullscreen ? 'Exit fullscreen (F)' : 'Fullscreen (F)'} title="Fullscreen (F)">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                {fullscreen ? <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" /> : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />}
+              </svg>
+            </button>
+            <button type="button" className="btn btn--icon" onClick={() => setOverlay('help')} aria-label="Keyboard shortcuts (?)" title="Shortcuts (?)">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="2" y="6" width="20" height="12" rx="2" />
+                <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10" />
+              </svg>
+            </button>
+            <button type="button" className="btn btn--outline btn--sm presenter__exit" onClick={exit}>
+              Exit
+              <kbd>Esc</kbd>
             </button>
           </div>
         </div>
-      )}
-    </div>
+
+        <div className="presenter__stage">
+          {leaving && (
+            <section key={`leave-${leaving.key}`} className="slide slide--leave" aria-hidden="true" inert onAnimationEnd={(e) => e.target === e.currentTarget && setLeaving(null)}>
+              <SlideView slide={leaving.slide} step={leaving.step} number={leaving.number} />
+            </section>
+          )}
+          <section key={index} className="slide slide--enter" aria-roledescription="slide" aria-label={`${index + 1} of ${deck.length}: ${current.title}`}>
+            <SlideView slide={current} step={step} number={index + 1} />
+          </section>
+          {blank && <div className="presenter__blank" onClick={() => setBlank(false)} aria-hidden="true" />}
+        </div>
+
+        <p className="visually-hidden" aria-live="polite">
+          Slide {index + 1} of {deck.length}: {current.title}. About {formatDuration(slideSeconds(current))} to read
+          {current.steps > 0 && step < current.steps ? `. ${current.steps - step} more points.` : ''}
+        </p>
+
+        <div className="presenter__bar presenter__bar--bottom">
+          <div className="presenter__progress" aria-hidden="true">
+            <span className="presenter__progress-fill" style={{ transform: `scaleX(${progress})` }} />
+            {sections.map((s) => {
+              // A tick where each section starts; a short talk may skip a section entirely.
+              const at = deck.findIndex((d) => d.section === s.id)
+              return at > 0 && <span key={s.id} className="presenter__tick" style={{ left: `${(at / LAST) * 100}%` }} />
+            })}
+          </div>
+          <div className="presenter__nav">
+            <span className="presenter__time" title={`Estimated time to read this slide. About ${formatDuration(secondsFrom(deck, index))} of reading left.`}>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg>
+              <span>{formatDuration(slideSeconds(current))} read</span>
+              <span className="presenter__left">· {formatDuration(secondsFrom(deck, index))} left</span>
+            </span>
+            <button type="button" className="btn btn--icon" onClick={prev} disabled={index === 0 && step === 0} aria-label="Previous">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+            <span className="presenter__count">
+              {index + 1} / {deck.length}
+            </span>
+            <button type="button" className="btn btn--icon" onClick={next} disabled={index === LAST && step === current.steps} aria-label="Next">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {overlay === 'overview' && (
+          <Overview
+            deck={deck}
+            length={length}
+            current={current.id}
+            onPick={(id) => {
+              setOverlay('none')
+              // A slide the short talk skips switches to the full deck at that slide.
+              const i = deck.findIndex((s) => s.id === id)
+              if (i === -1) chooseLength('full', id)
+              else go(i, 0)
+              root.current?.focus({ preventScroll: true })
+            }}
+            onClose={() => {
+              setOverlay('none')
+              root.current?.focus({ preventScroll: true })
+            }}
+          />
+        )}
+        {overlay === 'help' && (
+          <div className="presenter__overlay" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onClick={() => setOverlay('none')}>
+            <div className="presenter__help" onClick={(e) => e.stopPropagation()}>
+              <h2>Keyboard shortcuts</h2>
+              <dl>
+                {SHORTCUTS.map(([keys, what]) => (
+                  <div key={keys}>
+                    <dt>
+                      {keys.split('  ').map((k) => (
+                        <kbd key={k}>{k}</kbd>
+                      ))}
+                    </dt>
+                    <dd>{what}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="muted">On a touch screen, swipe left or right.</p>
+              <button type="button" className="btn btn--primary" onClick={() => setOverlay('none')} autoFocus>
+                Got it
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </DeckControlsContext.Provider>
   )
 }
 
-function Overview({ current, onPick, onClose }: { current: number; onPick: (i: number) => void; onClose: () => void }) {
+function Overview({ deck, length, current, onPick, onClose }: { deck: Slide[]; length: Length; current: string; onPick: (id: string) => void; onClose: () => void }) {
   const active = useRef<HTMLButtonElement>(null)
+  // The short talk still shows every slide, with the ones it skips dimmed, so any of them is one click away.
+  const shown = length === 'short' ? fullDeck : deck
+  const label = LENGTHS.find((l) => l.id === length)?.label
 
   useEffect(() => {
     active.current?.focus({ preventScroll: true })
@@ -413,35 +496,44 @@ function Overview({ current, onPick, onClose }: { current: number; onPick: (i: n
     <div className="presenter__overlay presenter__overlay--overview" role="dialog" aria-modal="true" aria-label="All slides">
       <div className="overview__head">
         <h2>
-          All slides <span className="overview__total">· about {formatDuration(deckSeconds)} to read</span>
+          {label}{' '}
+          <span className="overview__total">
+            · {deck.length} slides, about {formatDuration(totalSeconds(deck))} to read
+          </span>
         </h2>
         <button type="button" className="btn btn--outline btn--sm" onClick={onClose}>
           Close
           <kbd>Esc</kbd>
         </button>
       </div>
+      {length === 'short' && <p className="overview__note">Dimmed slides are in the full deck only. Pick one to switch to the full deck at that slide.</p>}
       <ol className="overview">
-        {deck.map((s, i) => (
-          <li key={s.id} style={{ '--i': Math.min(i, 30) } as CSSProperties}>
-            <button
-              ref={i === current ? active : undefined}
-              type="button"
-              className={`overview__card overview__card--${s.kind}${i === current ? ' is-current' : ''}`}
-              aria-current={i === current ? 'true' : undefined}
-              onClick={() => onPick(i)}
-            >
-              <span className="overview__meta">
-                <span className="overview__num">{i + 1}</span>
-                <span className="overview__time">
-                  <span className="visually-hidden">Time to read: </span>
-                  {formatDuration(slideSeconds(s))}
+        {shown.map((s, i) => {
+          const at = deck.findIndex((d) => d.id === s.id)
+          const skipped = at === -1
+          const isCurrent = s.id === current
+          return (
+            <li key={s.id} style={{ '--i': Math.min(i, 30) } as CSSProperties}>
+              <button
+                ref={isCurrent ? active : undefined}
+                type="button"
+                className={`overview__card overview__card--${s.kind}${isCurrent ? ' is-current' : ''}${skipped ? ' is-skipped' : ''}`}
+                aria-current={isCurrent ? 'true' : undefined}
+                onClick={() => onPick(s.id)}
+              >
+                <span className="overview__meta">
+                  <span className="overview__num">{skipped ? <span className="overview__full">Full deck</span> : at + 1}</span>
+                  <span className="overview__time">
+                    <span className="visually-hidden">Time to read: </span>
+                    {formatDuration(slideSeconds(s))}
+                  </span>
                 </span>
-              </span>
-              <span className="overview__section">{navOf(s.section) ?? meta.product}</span>
-              <span className="overview__title">{s.title}</span>
-            </button>
-          </li>
-        ))}
+                <span className="overview__section">{navOf(s.section) ?? meta.product}</span>
+                <span className="overview__title">{s.title}</span>
+              </button>
+            </li>
+          )
+        })}
       </ol>
     </div>
   )

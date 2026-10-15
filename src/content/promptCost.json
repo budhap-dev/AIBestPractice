@@ -8,7 +8,7 @@
       "prompt": "fix the login bug",
       "outcome": "Five rounds, two wrong fixes and a broken sign-up form.",
       "rounds": [
-        { "you": "fix the login bug", "copilot": "Searches the workspace, reads nine files and changes the form validation.", "added": 24000, "reply": 1500 },
+        { "you": "fix the login bug", "copilot": "Searches the project, reads nine files and changes the form validation.", "added": 24000, "reply": 1500 },
         { "you": "no, it’s the token [pastes a 2,000-line log]", "copilot": "Rewrites the login handler.", "added": 30000, "reply": 1500 },
         { "you": "still failing", "copilot": "Runs the whole test suite and reads the output.", "added": 14000, "reply": 2000 },
         { "you": "it’s in the refresh code, try again", "copilot": "Re-reads the auth files and edits refresh.ts.", "added": 9000, "reply": 2000 },

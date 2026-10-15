@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { facts, termsIn } from '../content'
+import { facts, pageTerms, stories } from '../content'
 import type { FunFact, Item, SectionInfo } from '../content/types'
 import { href } from '../router'
+import { Illustration } from './Illustrations'
 import { RichText } from './RichText'
 
 type ShowToast = (message: string) => void
@@ -82,13 +83,17 @@ export function Source({ item }: { item: Pick<Item, 'sourceUrl' | 'verify'> }) {
 }
 
 export function Section({ info, children }: { info: SectionInfo; children: ReactNode }) {
+  const scene = stories[`section-${info.id}`]?.scene
   return (
     <section id={info.id} className="section" aria-labelledby={`${info.id}-title`}>
       <header className="section__head">
+        {scene && <Illustration scene={scene} className="section__art" />}
         <p className="eyebrow">{info.nav}</p>
-        <h2 id={`${info.id}-title`} tabIndex={-1}>{info.title}</h2>
+        <h2 id={`${info.id}-title`} tabIndex={-1}>
+          {info.title}
+        </h2>
         <p className="lede">{info.intro}</p>
-        <TermLinks text={`${info.title} ${info.intro}`} skip={info.id === 'key-terms'} />
+        <TermLinks id={info.id} />
       </header>
       {children}
       <FunFacts list={facts.filter((f) => f.section === info.id)} />
@@ -96,13 +101,13 @@ export function Section({ info, children }: { info: SectionInfo; children: React
   )
 }
 
-// Links each AI term a page intro uses to its plain-English definition.
-export function TermLinks({ text, skip }: { text: string; skip?: boolean }) {
-  const terms = skip ? [] : termsIn(text)
+// Links every AI or tooling term used anywhere on the page to its plain-English definition.
+export function TermLinks({ id }: { id: string }) {
+  const terms = pageTerms(id)
   if (!terms.length) return null
   return (
     <p className="term-links">
-      <span className="term-links__label">New to these words?</span>
+      <span className="term-links__label">Words on this page</span>
       {terms.map((t) => (
         <a key={t.id} href={href({ kind: 'section', id: 'key-terms', item: t.id })} title={t.short}>
           {t.title}

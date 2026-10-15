@@ -1,5 +1,11 @@
 [
   {
+    "id": "why",
+    "nav": "Why it matters",
+    "title": "AI can halve the work, or quietly double it",
+    "intro": "Building a feature used to mean hours of searching, boilerplate, tests and debugging. AI coding assistants can take a big share of that away, but only when they are used well. Here is the before, the after and the catch."
+  },
+  {
     "id": "key-terms",
     "nav": "Key terms",
     "title": "New to AI? Start with these words",
@@ -7,7 +13,7 @@
   },
   {
     "id": "mental-model",
-    "nav": "Mental model",
+    "nav": "How context works",
     "title": "Context is a whiteboard, and you pay for every word on it",
     "intro": "Each time you send a prompt, Copilot re-sends everything in the chat: history, attached files, instruction files and tool output. Copilot now bills in AI credits by tokens, so a crowded chat is slower, less accurate and costs more for the same question."
   },

@@ -17,4 +17,6 @@ These are confirmed, but they change often or were confirmed only through offici
 - **"Suggestions matching public code" Allow/Block wording** (`security.json` → `sec-public-code`).
 - **`#file:path` in typed prompts.** The docs describe picking files after typing `#`. [PROMPTS.md](PROMPTS.md) uses `#file:docs/SPEC.md`. If that text form doesn't attach the file in your VS Code version, type `#` and pick the file instead.
 - **No keyboard shortcut for switching chat modes** is documented; the guide says to use the Agent picker.
+- **Research figures** (`opening.json`). Checked on the primary sources on 15 Oct 2026. METR's July 2025 result is about early-2025 tools; its Feb 2026 follow-up points to a speed-up but METR calls that data unreliable, so recheck before quoting. DORA 2025 publishes no effect sizes, so the guide quotes DORA 2024.
+- **Approval options** in the approval gate diagram (`diagrams.json` → `approvalGate`) are plain-English labels for the Allow choices in VS Code, not the exact button text.
 - **`/fixTestFailure`** is not on the current cheat sheet, so the guide leaves it out. Use the Fix Test Failure button in Test Explorer.
