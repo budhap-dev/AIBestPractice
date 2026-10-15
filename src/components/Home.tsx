@@ -9,6 +9,16 @@ export function Home() {
         {meta.headline}
       </h1>
       <p className="hero__lede">{meta.tagline}</p>
+      <dl className="hero__audience">
+        <div>
+          <dt>Built for</dt>
+          <dd>{meta.endUsers}</dd>
+        </div>
+        <div>
+          <dt>Demo audience</dt>
+          <dd>{meta.demoAudience}</dd>
+        </div>
+      </dl>
       <div className="hero__cta">
         <a className="btn btn--primary" href={href({ kind: 'section', id: 'workflow' })}>
           Start with the daily workflow

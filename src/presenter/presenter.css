@@ -120,6 +120,30 @@ html.presenting body {
   transition: opacity 0.4s;
 }
 
+.presenter__time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+  font-size: 0.8rem;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.presenter__time svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.presenter__left {
+  color: var(--text-3);
+}
+
 .presenter__count {
   min-width: 64px;
   text-align: center;
@@ -241,7 +265,8 @@ html.presenting body {
   }
 
   .presenter__product,
-  .presenter__select {
+  .presenter__select,
+  .presenter__left {
     display: none;
   }
 }
@@ -440,6 +465,27 @@ html.presenting body {
   font-size: 1em;
   color: var(--text-2);
   max-width: 46ch;
+}
+
+.slide__audience {
+  margin: 0;
+  padding: 0.5em 0.8em;
+  max-width: 46ch;
+  font-size: 0.72em;
+  color: var(--text-2);
+  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 70%, transparent);
+  border-radius: 0 0.4em 0.4em 0;
+}
+
+.slide__audience strong {
+  color: var(--accent);
+  margin-right: 0.3em;
+}
+
+.agenda__time {
+  margin-top: -0.6em;
+  font-size: 0.8em;
 }
 
 .slide__by {
@@ -882,6 +928,24 @@ html.presenting body {
 .overview__card.is-current {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
+}
+
+.overview__total {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.overview__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.overview__time {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
 }
 
 .overview__num {

@@ -3,8 +3,11 @@
   "headline": "Get more from GitHub Copilot, every day.",
   "tagline": "Short, practical habits for VS Code: keep the context focused, spend AI credits wisely, write prompts that land, and review everything before it ships.",
   "closing": "Keep the guide open next to your editor, and come back to the cheat sheet whenever you need it.",
-  "company": "[COMPANY]",
-  "owner": "[NAME]",
+  "company": "ASDA",
+  "owner": "Budhaditya Pandit (Budha)",
+  "endUsers": "ASDA developers who use GitHub Copilot in VS Code, from first-week users to daily power users. They keep the guide open next to their editor as an everyday reference.",
+  "demoAudience": "ASDA engineering teams in a live session: developers, tech leads and engineering managers with mixed Copilot experience.",
+  "readingWordsPerMinute": 200,
   "lastReviewed": "14 Oct 2026",
   "policyUrl": "",
   "copilotVersionNote": "Checked against the VS Code and GitHub Copilot docs on 14 Oct 2026. Copilot changes monthly: items marked “Needs verification” are listed in VERIFY.md."

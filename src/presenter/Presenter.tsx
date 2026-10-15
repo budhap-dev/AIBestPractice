@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useRef, useState, type CSSProperties } from 
 import { meta, sections } from '../content'
 import { ThemeMenu } from '../components/ThemeMenu'
 import { navigate } from '../router'
-import { deck } from './deck'
+import { deck, deckSeconds, formatDuration, secondsFrom, slideSeconds } from './deck'
 import { SlideView } from './Slide'
 import './presenter.css'
 
@@ -295,7 +295,7 @@ export function Presenter({ slide }: { slide: number }) {
       </div>
 
       <p className="visually-hidden" aria-live="polite">
-        Slide {index + 1} of {deck.length}: {current.title}
+        Slide {index + 1} of {deck.length}: {current.title}. About {formatDuration(slideSeconds(current))} to read
         {current.steps > 0 && step < current.steps ? `. ${current.steps - step} more points.` : ''}
       </p>
 
@@ -308,6 +308,14 @@ export function Presenter({ slide }: { slide: number }) {
           })}
         </div>
         <div className="presenter__nav">
+          <span className="presenter__time" title={`Estimated time to read this slide. About ${formatDuration(secondsFrom(index))} of reading left.`}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3 2" />
+            </svg>
+            <span>{formatDuration(slideSeconds(current))} read</span>
+            <span className="presenter__left">· {formatDuration(secondsFrom(index))} left</span>
+          </span>
           <button type="button" className="btn btn--icon" onClick={prev} disabled={index === 0 && step === 0} aria-label="Previous">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="m15 18-6-6 6-6" />
@@ -376,7 +384,9 @@ function Overview({ current, onPick, onClose }: { current: number; onPick: (i: n
   return (
     <div className="presenter__overlay presenter__overlay--overview" role="dialog" aria-modal="true" aria-label="All slides">
       <div className="overview__head">
-        <h2>All slides</h2>
+        <h2>
+          All slides <span className="overview__total">· about {formatDuration(deckSeconds)} to read</span>
+        </h2>
         <button type="button" className="btn btn--outline btn--sm" onClick={onClose}>
           Close
           <kbd>Esc</kbd>
@@ -392,7 +402,13 @@ function Overview({ current, onPick, onClose }: { current: number; onPick: (i: n
               aria-current={i === current ? 'true' : undefined}
               onClick={() => onPick(i)}
             >
-              <span className="overview__num">{i + 1}</span>
+              <span className="overview__meta">
+                <span className="overview__num">{i + 1}</span>
+                <span className="overview__time">
+                  <span className="visually-hidden">Time to read: </span>
+                  {formatDuration(slideSeconds(s))}
+                </span>
+              </span>
               <span className="overview__section">{navOf(s.section) ?? meta.product}</span>
               <span className="overview__title">{s.title}</span>
             </button>

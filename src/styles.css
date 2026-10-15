@@ -705,6 +705,36 @@ main:focus {
   max-width: 60ch;
 }
 
+.hero__audience {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 12px;
+  max-width: 820px;
+  margin: 20px 0 0;
+}
+
+.hero__audience > div {
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.hero__audience dt {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.hero__audience dd {
+  margin: 0;
+  font-size: 0.925rem;
+  color: var(--text-2);
+}
+
 .hero__cta {
   display: flex;
   flex-wrap: wrap;

@@ -4,6 +4,13 @@ A static web app that teaches everyday GitHub Copilot habits in VS Code: keeping
 
 It works as a live demo for a team session and as a reference people keep open next to their editor.
 
+## Who it's for
+
+- **End users:** ASDA developers who use GitHub Copilot in VS Code, from first-week users to daily power users. They keep the guide open next to their editor as an everyday reference.
+- **Demo audience:** ASDA engineering teams in a live session: developers, tech leads and engineering managers with mixed Copilot experience.
+
+Both lines show on the home page, and the demo audience shows on the first slide. Edit them in `src/content/meta.json`.
+
 ## What's inside
 
 Each section has its own page, with previous and next links at the bottom. Pages use hash URLs such as `#/cheat-sheet` or `#/cheat-sheet/cmd-compact` for a single item, so links can be shared and old `#cmd-compact` links still work.
@@ -39,6 +46,8 @@ Each press of → reveals the next point on a slide, then moves to the next slid
 | ? | Show the shortcuts |
 | Esc | Leave presenter mode, back to the current section's page |
 
+Every slide shows an estimated time to read in the bottom bar, with the reading time left in the deck. The overview shows each slide's time and the total, about 25 minutes. Times assume 200 words per minute; change `readingWordsPerMinute` in `meta.json` to suit your audience.
+
 On touch screens, swipe left or right. The toolbar hides after a few seconds without mouse movement. Slide layouts live in `src/presenter/deck.ts`.
 
 ## Themes
@@ -69,7 +78,7 @@ All text lives in typed JSON files in [`src/content/`](src/content). You don't n
 
 | File | Holds |
 |---|---|
-| `meta.json` | Company name, owner, last-reviewed date, AI policy link |
+| `meta.json` | Company name, owner, end users, demo audience, reading speed, last-reviewed date, AI policy link |
 | `sections.json` | Section order, nav labels, titles and intros |
 | `context.json`, `modes.json`, `commands.json` | Mental model cards, chat modes, cheat sheet rows |
 | `workflow.json` | Workflow steps, long-chat decisions, checklist items |
