@@ -16,6 +16,9 @@ Phase: all phases done (PR 1 app, PR 2 polish + docs).
 - Edit mode is deprecated: modes are Ask / Plan / Agent.
 - @workspace and suggestion cycling flagged verify: true (see VERIFY.md).
 
+- Oct 2026: Key terms section + glossary links on every page; Prompt cost section; animated diagrams (request flow, snowball, prompt anatomy, modes, chat flow, team memory) on pages and as deck slides; Did you know? facts (sourced, checked 15 Oct 2026); Wrap-up section; confetti for quiz, checklist and deck end; Random transition.
+- Diagram series colours (--dg-1..5) come from a CVD-validated categorical palette, stepped for dark; text stays in text colours.
+
 ## Next
 - Fill company, owner and policy link in src/content/meta.json.
 - Check the print cheat sheet in a real browser print preview.

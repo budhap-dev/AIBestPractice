@@ -1,7 +1,9 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { meta, sections } from '../content'
-import { CodeBlock, Kbd } from '../components/ui'
+import { DiagramView } from '../components/Diagrams'
+import { BulbIcon, CodeBlock, Kbd } from '../components/ui'
 import { deckSeconds, formatDuration, type Slide } from './deck'
+import { RichText } from '../components/RichText'
 
 // A fragment is shown once the step count passes its position.
 const frag = (step: number, k: number, extra = '') => `frag${step > k ? ' is-in' : ''}${extra ? ` ${extra}` : ''}`
@@ -15,7 +17,9 @@ function Head({ eyebrow, title, part }: { eyebrow?: string; title: string; part?
           {part && <span className="slide__part"> · {part}</span>}
         </p>
       )}
-      <h2 className="slide__title intro">{title}</h2>
+      <h2 className="slide__title intro">
+        <RichText text={title} />
+      </h2>
     </header>
   )
 }
@@ -66,7 +70,19 @@ export function SlideView({ slide, step }: { slide: Slide; step: number }) {
           </span>
           <p className="slide__eyebrow intro">{navOf(slide.section)}</p>
           <h2 className="slide__hero intro">{slide.title}</h2>
-          <p className={frag(step, 0, 'slide__lede')}>{slide.intro}</p>
+          <p className={frag(step, 0, 'slide__lede')}>
+            <RichText text={slide.intro} />
+          </p>
+          {slide.terms.length > 0 && (
+            <p className={frag(step, 0, 'divider__terms')}>
+              <span className="divider__terms-label">Key words</span>
+              {slide.terms.map((t) => (
+                <span key={t} className="divider__term">
+                  {t}
+                </span>
+              ))}
+            </p>
+          )}
         </div>
       )
       break
@@ -79,17 +95,27 @@ export function SlideView({ slide, step }: { slide: Slide; step: number }) {
             {slide.cards.map((c, i) => (
               <article key={c.id} className={frag(step, i, 'deck-card')}>
                 {c.kicker && <p className="deck-card__kicker">{c.kicker}</p>}
-                <h3>{c.title}</h3>
+                <h3>
+                  <RichText text={c.title} />
+                </h3>
                 {c.code && <code className="deck-card__code">{c.code}</code>}
                 {c.list && (
                   <ul>
                     {c.list.map((l) => (
-                      <li key={l}>{l}</li>
+                      <li key={l}>
+                        <RichText text={l} />
+                      </li>
                     ))}
                   </ul>
                 )}
-                <p>{c.body}</p>
-                {c.example && <p className="deck-card__example">{c.example}</p>}
+                <p>
+                  <RichText text={c.body} />
+                </p>
+                {c.example && (
+                  <p className="deck-card__example">
+                    <RichText text={c.example} />
+                  </p>
+                )}
               </article>
             ))}
           </div>
@@ -102,10 +128,12 @@ export function SlideView({ slide, step }: { slide: Slide; step: number }) {
         <>
           <Head eyebrow={slide.eyebrow} title={slide.title} />
           {slide.tag && <span className="tag slide__tag intro">{slide.tag}</span>}
-          <p className="slide__lede intro">{slide.body}</p>
+          <p className="slide__lede intro">
+            <RichText text={slide.body} />
+          </p>
           {slide.points.map((p, i) => (
             <p key={p.label} className={frag(step, i, 'detail__point')}>
-              <strong>{p.label}</strong> {p.text}
+              <strong>{p.label}</strong> <RichText text={p.text} />
             </p>
           ))}
           {slide.code && (
@@ -138,7 +166,9 @@ export function SlideView({ slide, step }: { slide: Slide; step: number }) {
                     <code>{r.code}</code>
                   )}
                 </dt>
-                <dd>{r.body}</dd>
+                <dd>
+                  <RichText text={r.body} />
+                </dd>
               </div>
             ))}
           </dl>
@@ -157,8 +187,18 @@ export function SlideView({ slide, step }: { slide: Slide; step: number }) {
                   {slide.start + i}
                 </span>
                 <div>
-                  <h3>{s.title}</h3>
-                  <p>{s.body}</p>
+                  <h3>
+                    <RichText text={s.title} />
+                  </h3>
+                  <p>
+                    <RichText text={s.body} />
+                  </p>
+                  {s.code && (
+                    <p className="deck-step__try">
+                      <span className="deck-step__try-label">Try</span>
+                      <code>{s.code}</code>
+                    </p>
+                  )}
                 </div>
               </li>
             ))}
@@ -186,8 +226,12 @@ export function SlideView({ slide, step }: { slide: Slide; step: number }) {
                   <ul>
                     {list.map((r, i) => (
                       <li key={r.id} className={frag(step, offset + i)}>
-                        <strong>{r.title}</strong>
-                        <span>{r.body}</span>
+                        <strong>
+                          <RichText text={r.title} />
+                        </strong>
+                        <span>
+                          <RichText text={r.body} />
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -211,22 +255,82 @@ export function SlideView({ slide, step }: { slide: Slide; step: number }) {
                 <span className="deck-quiz__letter" aria-hidden="true">
                   {String.fromCharCode(65 + i)}
                 </span>
-                <span>{o.text}</span>
+                <span>
+                  <RichText text={o.text} />
+                </span>
                 {revealed && o.correct && <span className="visually-hidden"> (correct answer)</span>}
               </li>
             ))}
           </ol>
           <p className={frag(step, q.options.length, 'deck-quiz__why')}>
-            <strong>Why:</strong> {q.why}
+            <strong>Why:</strong> <RichText text={q.why} />
           </p>
         </>
       )
       break
     }
 
+    case 'diagram':
+      body = (
+        <>
+          <Head eyebrow={slide.eyebrow} title={slide.title} />
+          <div className="slide__diagram intro">
+            <DiagramView id={slide.diagram} step={step} compact />
+          </div>
+        </>
+      )
+      break
+
+    case 'facts':
+      body = (
+        <>
+          <Head eyebrow={navOf(slide.section)} title={slide.title} />
+          <div className="deck-facts">
+            {slide.facts.map((f, i) => (
+              <article key={f.id} className={frag(step, i, 'deck-fact')}>
+                <span className="deck-fact__icon" aria-hidden="true">
+                  <BulbIcon />
+                </span>
+                <h3>
+                  <RichText text={f.title} />
+                </h3>
+                <p>
+                  <RichText text={f.body} />
+                </p>
+              </article>
+            ))}
+          </div>
+        </>
+      )
+      break
+
+    case 'summary':
+      body = (
+        <>
+          <Head eyebrow={navOf(slide.section)} title={slide.title} />
+          <ol className="deck-summary">
+            {slide.items.map((t, i) => (
+              <li key={t.id} className={frag(step, i)}>
+                <span className="deck-summary__num" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <div>
+                  <strong>{t.title}</strong>
+                  <span>
+                    <RichText text={t.body} />
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </>
+      )
+      break
+
     case 'end':
       body = (
         <div className="slide__center">
+          <p className="slide__eyebrow intro">You made it</p>
           <h2 className="slide__hero intro">{slide.title}</h2>
           <p className="slide__lede intro">{meta.closing}</p>
           <p className="slide__by intro">

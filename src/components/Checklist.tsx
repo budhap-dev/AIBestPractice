@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { workflow } from '../content'
 import type { ChecklistItem } from '../content/types'
+import { celebrate } from './confetti'
+import { useToast } from './ui'
 
 const KEY = 'cfg-checklist'
 
@@ -16,6 +18,7 @@ function load(): string[] {
 
 export function Checklist() {
   const [done, setDone] = useState<string[]>(load)
+  const toast = useToast()
 
   useEffect(() => {
     try {
@@ -25,7 +28,15 @@ export function Checklist() {
     }
   }, [done])
 
-  const toggle = (id: string) => setDone((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id]))
+  function toggle(id: string, box: HTMLInputElement) {
+    const next = done.includes(id) ? done.filter((x) => x !== id) : [...done, id]
+    setDone(next)
+    // Ticking the last box is worth a small party.
+    if (box.checked && workflow.checklist.every((c) => next.includes(c.id))) {
+      celebrate({ size: 'big' })
+      toast('Checklist done. Commit, then /clear.')
+    }
+  }
   const phases: ChecklistItem['phase'][] = ['Start', 'During', 'Finish']
   const count = workflow.checklist.filter((c) => done.includes(c.id)).length
 
@@ -48,7 +59,7 @@ export function Checklist() {
               .filter((c) => c.phase === p)
               .map((c) => (
                 <label key={c.id} className="check">
-                  <input type="checkbox" checked={done.includes(c.id)} onChange={() => toggle(c.id)} />
+                  <input type="checkbox" checked={done.includes(c.id)} onChange={(e) => toggle(c.id, e.currentTarget)} />
                   <span>{c.label}</span>
                 </label>
               ))}

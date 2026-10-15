@@ -1,12 +1,44 @@
-import { useState, type ReactElement } from 'react'
-import { beyond, commands, contextSources, memoryFiles, meta, modes, rules, section, security, templates, workflow } from '../content'
+import { useState, type CSSProperties, type ReactElement } from 'react'
+import { beyond, commands, contextSources, glossary, memoryFiles, meta, modes, rules, section, sections, security, takeaways, templates, workflow } from '../content'
 import { ACTION_LABEL, GROUPS, RULE_GROUPS } from '../content/labels'
 import type { RuleGroup } from '../content/types'
+import { href } from '../router'
 import { Checklist } from './Checklist'
+import { celebrate } from './confetti'
 import { ContextMeter } from './ContextMeter'
 import { PromptBuilder } from './PromptBuilder'
 import { Quiz } from './Quiz'
-import { CodeBlock, CopyButton, Kbd, Section, Source } from './ui'
+import { RichText } from './RichText'
+import { Diagram } from './Diagrams'
+import { CodeBlock, CopyButton, Kbd, Section, Source, useToast } from './ui'
+
+export function KeyTerms() {
+  return (
+    <Section info={section('key-terms')}>
+      <h3 className="subhead">What happens when you press Enter</h3>
+      <Diagram id="request" />
+      <h3 className="subhead">The words, in plain English</h3>
+      <dl className="terms">
+        {glossary.map((t) => (
+          <div key={t.id} id={t.id} className="card term">
+            <dt>
+              <dfn>{t.title}</dfn>
+            </dt>
+            <dd>
+              <p>
+                <RichText text={t.body} />
+              </p>
+              <p className="term__analogy">
+                <span>Think of it as</span> {t.analogy}
+              </p>
+              {t.sourceUrl && <Source item={t} />}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </Section>
+  )
+}
 
 export function MentalModel() {
   return (
@@ -26,9 +58,24 @@ export function MentalModel() {
   )
 }
 
+export function PromptCost() {
+  return (
+    <Section info={section('prompt-cost')}>
+      <Diagram id="snowball" />
+      <h3 className="subhead">Anatomy of a prompt that lands</h3>
+      <p className="muted">The focused prompt above, taken apart. Each part saves a round of guessing.</p>
+      <Diagram id="anatomy" />
+      <p className="callout">
+        More fill-in-the-blanks prompts in <a href={href({ kind: 'section', id: 'templates' })}>Prompt templates</a>.
+      </p>
+    </Section>
+  )
+}
+
 export function Modes() {
   return (
     <Section info={section('modes')}>
+      <Diagram id="modes" />
       <div className="grid grid--2">
         {modes.map((m) => (
           <article key={m.id} id={m.id} className="card mode">
@@ -127,6 +174,7 @@ export function Workflow() {
       </ol>
 
       <h3 className="subhead">When the chat gets long</h3>
+      <Diagram id="chat-flow" />
       <div className="grid grid--3">
         {workflow.decisions.map((d) => (
           <article key={d.id} id={d.id} className={`card decision decision--${d.action}`}>
@@ -193,6 +241,8 @@ export function DosDonts() {
 export function TeamMemory() {
   return (
     <Section info={section('team-memory')}>
+      <h3 className="subhead">What gets sent, and when</h3>
+      <Diagram id="memory" />
       <div className="stack">
         {memoryFiles.map((m) => (
           <details key={m.id} id={m.id} className="card memory">
@@ -284,9 +334,51 @@ export function Beyond() {
   )
 }
 
+export function WrapUp() {
+  const toast = useToast()
+  return (
+    <Section info={section('wrap-up')}>
+      <ol className="takeaways">
+        {takeaways.map((t, i) => (
+          <li key={t.id} id={t.id} className="takeaway" style={{ '--i': i } as CSSProperties}>
+            <span className="takeaway__num" aria-hidden="true">
+              {i + 1}
+            </span>
+            <div>
+              <h3>{t.title}</h3>
+              <p>
+                <RichText text={t.body} />
+              </p>
+              <a className="takeaway__more" href={href({ kind: 'section', id: t.section })}>
+                Revisit {sections.find((s) => s.id === t.section)?.nav}
+                <span aria-hidden="true"> →</span>
+              </a>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <div className="callout wrapup__end">
+        <p>{meta.closing}</p>
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={(e) => {
+            celebrate({ size: 'big', from: e.currentTarget })
+            toast('Go get them. Start with /clear.')
+          }}
+        >
+          I’m ready
+        </button>
+      </div>
+    </Section>
+  )
+}
+
 // One page per section, keyed by the ids in sections.json.
 export const SECTION_PAGES: Record<string, () => ReactElement> = {
+  'key-terms': KeyTerms,
   'mental-model': MentalModel,
+  'prompt-cost': PromptCost,
   modes: Modes,
   'cheat-sheet': CheatSheet,
   workflow: Workflow,
@@ -296,4 +388,5 @@ export const SECTION_PAGES: Record<string, () => ReactElement> = {
   quiz: Practice,
   security: Security,
   beyond: Beyond,
+  'wrap-up': WrapUp,
 }

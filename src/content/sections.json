@@ -1,9 +1,21 @@
 [
   {
+    "id": "key-terms",
+    "nav": "Key terms",
+    "title": "New to AI? Start with these words",
+    "intro": "Copilot’s docs talk about context, tokens and agents as if everyone knows them. Here is what each word means in plain English, with an everyday comparison, and what actually happens when you press Enter."
+  },
+  {
     "id": "mental-model",
     "nav": "Mental model",
     "title": "Context is a whiteboard, and you pay for every word on it",
     "intro": "Each time you send a prompt, Copilot re-sends everything in the chat: history, attached files, instruction files and tool output. Copilot now bills in AI credits by tokens, so a crowded chat is slower, less accurate and costs more for the same question."
+  },
+  {
+    "id": "prompt-cost",
+    "nav": "Prompt cost",
+    "title": "A vague prompt snowballs",
+    "intro": "Every follow-up re-sends the whole chat. A vague prompt needs more rounds, and each round carries everything before it, so the cost grows faster than the conversation. Here is the same bug fixed with two different prompts."
   },
   {
     "id": "modes",
@@ -58,5 +70,11 @@
     "nav": "Beyond the editor",
     "title": "Copilot outside the chat panel",
     "intro": "Smaller features that save time every day, from commit messages to pull request reviews."
+  },
+  {
+    "id": "wrap-up",
+    "nav": "Wrap-up",
+    "title": "Seven habits to take away",
+    "intro": "If you remember nothing else, remember these. Each one links back to the page with the detail."
   }
 ]

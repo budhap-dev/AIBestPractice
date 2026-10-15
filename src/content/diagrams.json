@@ -1,0 +1,145 @@
+{
+  "request": {
+    "steps": [
+      {
+        "title": "You write a prompt",
+        "body": "A question or a task, typed in the chat."
+      },
+      {
+        "title": "Copilot packs the context",
+        "body": "Your prompt goes in with everything else the model needs to see.",
+        "show": "packed"
+      },
+      {
+        "title": "The model reads tokens",
+        "body": "Text is split into small chunks. Every chunk counts towards the window and the bill.",
+        "show": "tokens"
+      },
+      {
+        "title": "It writes a reply",
+        "body": "Or, as an agent, asks to use a tool: read a file, run a command."
+      },
+      {
+        "title": "Results go back into the context",
+        "body": "Tool output and the reply join the history, and the next request carries them all."
+      }
+    ],
+    "packed": [
+      "Instruction files",
+      "Chat history",
+      "Attached files",
+      "Your prompt"
+    ],
+    "tokens": [
+      "fix",
+      " the",
+      " log",
+      "in",
+      " bug",
+      " in",
+      " auth",
+      ".ts"
+    ],
+    "tokensNote": "Illustrative split: real tokenisers vary by model.",
+    "loop": "Agent mode repeats steps 2 to 5 until the task is done"
+  },
+  "modes": [
+    {
+      "mode": "Ask",
+      "does": "Reads your code and answers",
+      "changes": "Nothing",
+      "cost": "Lowest"
+    },
+    {
+      "mode": "Plan",
+      "does": "Researches and writes a plan",
+      "changes": "Nothing until you agree",
+      "cost": "Medium"
+    },
+    {
+      "mode": "Agent",
+      "does": "Edits files and runs commands",
+      "changes": "Your code",
+      "cost": "Highest"
+    }
+  ],
+  "chatFlow": {
+    "start": "The chat is getting long",
+    "questions": [
+      {
+        "question": "Has the task changed?",
+        "yes": "new-chat",
+        "yesDetail": "/clear, then carry over the decisions in a sentence or two."
+      },
+      {
+        "question": "Is the context window about half full?",
+        "yes": "summarise",
+        "yesDetail": "/compact keep the API contract and open issues"
+      }
+    ],
+    "otherwise": "continue",
+    "otherwiseDetail": "Short prompts, brief replies."
+  },
+  "memory": {
+    "requests": [
+      "Edit a React component",
+      "Fix a SQL migration",
+      "Run /review-changes",
+      "Ask about a CSS bug"
+    ],
+    "lanes": [
+      {
+        "label": "Every request",
+        "files": [
+          {
+            "name": "copilot-instructions.md",
+            "on": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        ]
+      },
+      {
+        "label": "When matching files are in play",
+        "files": [
+          {
+            "name": "react.instructions.md",
+            "on": [
+              true,
+              false,
+              false,
+              true
+            ]
+          },
+          {
+            "name": "sql.instructions.md",
+            "on": [
+              false,
+              true,
+              false,
+              false
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Only when you run it",
+        "files": [
+          {
+            "name": "review-changes.prompt.md",
+            "on": [
+              false,
+              false,
+              true,
+              false
+            ]
+          }
+        ]
+      }
+    ],
+    "note": "Always-on files ride along with every request, so keep them short. Specialist rules cost nothing until their files are in play."
+  }
+}

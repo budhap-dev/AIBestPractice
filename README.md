@@ -17,8 +17,10 @@ Each section has its own page, with previous and next links at the bottom. Pages
 
 | Section | What it covers |
 |---|---|
+| Key terms | Plain-English definitions for people new to AI (context, token, agent…), each with an everyday comparison, and an animated **what happens when you press Enter** diagram. Every other page links the terms its intro uses. |
 | Mental model | What fills the context window, and why every prompt re-sends (and re-bills) all of it. Includes the interactive **context meter**. |
-| Chat modes | Ask, Plan and Agent, and when to use each. Edit is deprecated. |
+| Prompt cost | Animated diagrams of the same bug fixed with a vague prompt and a focused one, showing how re-sent history snowballs, plus the anatomy of a good prompt. |
+| Chat modes | Ask, Plan and Agent, and when to use each, with a cost staircase diagram. Edit is deprecated. |
 | Cheat sheet | Slash commands, `#` context, `@` participants, shortcuts (macOS / Windows), context and model settings. |
 | Daily workflow | A seven-step routine, a "when the chat gets long" decision guide and a daily checklist. |
 | Do's and don'ts | Grouped by context & cost, prompting, reviewing and security, each with a one-line why. |
@@ -27,6 +29,9 @@ Each section has its own page, with previous and next links at the bottom. Pages
 | Test yourself | A scenario quiz. |
 | Security | Approvals, auto-approve, sandboxing, content exclusion and public code. |
 | Beyond the editor | Commit messages, terminal chat, smart actions, PR review and the cloud agent. |
+| Wrap-up | Seven takeaways, each linking back to its section. |
+
+Most sections end with **Did you know?** facts, each with a docs link. Small wins get confetti: a right quiz answer, a finished checklist and the end of the deck. Confetti and diagram animations are off when the system asks for reduced motion.
 
 ## Presenter mode
 
@@ -41,12 +46,12 @@ Each press of → reveals the next point on a slide, then moves to the next slid
 | Home / End | First or last slide |
 | O | Overview of all slides |
 | F | Fullscreen |
-| T | Next transition: Slide, Fade, Zoom, Flip |
+| T | Next transition: Slide, Fade, Zoom, Flip, Page turn, Cube, Wipe, Circle, Rise, Random |
 | B | Blank the screen |
 | ? | Show the shortcuts |
 | Esc | Leave presenter mode, back to the current section's page |
 
-Every slide shows an estimated time to read in the bottom bar, with the reading time left in the deck. The overview shows each slide's time and the total, about 25 minutes. Times assume 200 words per minute; change `readingWordsPerMinute` in `meta.json` to suit your audience.
+Every slide shows an estimated time to read in the bottom bar, with the reading time left in the deck. The overview shows each slide's time and the total, about 36 minutes. Times assume 200 words per minute; change `readingWordsPerMinute` in `meta.json` to suit your audience.
 
 On touch screens, swipe left or right. The toolbar hides after a few seconds without mouse movement. Slide layouts live in `src/presenter/deck.ts`.
 
@@ -86,6 +91,11 @@ All text lives in typed JSON files in [`src/content/`](src/content). You don't n
 | `memory.json`, `templates.json` | Team memory files and prompt templates |
 | `quiz.json`, `meter.json` | Quiz scenarios and the context meter's actions and models |
 | `security.json`, `beyond.json` | Security and beyond-the-editor cards |
+| `glossary.json` | Key terms: definition, everyday comparison, and the words that link a page to each term |
+| `promptCost.json` | The vague and focused prompt scenarios (illustrative token counts) and the prompt anatomy |
+| `diagrams.json` | Text for the request flow, modes staircase, long-chat flowchart and team memory diagrams |
+| `facts.json` | Did you know? facts, each tied to a section and a source |
+| `summary.json` | Wrap-up takeaways |
 
 Every item can carry:
 

@@ -1,5 +1,8 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
-import type { Item, SectionInfo } from '../content/types'
+import { createContext, useCallback, useContext, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { facts, termsIn } from '../content'
+import type { FunFact, Item, SectionInfo } from '../content/types'
+import { href } from '../router'
+import { RichText } from './RichText'
 
 type ShowToast = (message: string) => void
 
@@ -85,9 +88,59 @@ export function Section({ info, children }: { info: SectionInfo; children: React
         <p className="eyebrow">{info.nav}</p>
         <h2 id={`${info.id}-title`} tabIndex={-1}>{info.title}</h2>
         <p className="lede">{info.intro}</p>
+        <TermLinks text={`${info.title} ${info.intro}`} skip={info.id === 'key-terms'} />
       </header>
       {children}
+      <FunFacts list={facts.filter((f) => f.section === info.id)} />
     </section>
+  )
+}
+
+// Links each AI term a page intro uses to its plain-English definition.
+export function TermLinks({ text, skip }: { text: string; skip?: boolean }) {
+  const terms = skip ? [] : termsIn(text)
+  if (!terms.length) return null
+  return (
+    <p className="term-links">
+      <span className="term-links__label">New to these words?</span>
+      {terms.map((t) => (
+        <a key={t.id} href={href({ kind: 'section', id: 'key-terms', item: t.id })} title={t.short}>
+          {t.title}
+        </a>
+      ))}
+    </p>
+  )
+}
+
+export function FunFacts({ list }: { list: FunFact[] }) {
+  if (!list.length) return null
+  return (
+    <div className="funfacts">
+      {list.map((f, i) => (
+        <aside key={f.id} id={f.id} className="funfact" aria-labelledby={`${f.id}-title`} style={{ '--i': i } as CSSProperties}>
+          <span className="funfact__icon" aria-hidden="true">
+            <BulbIcon />
+          </span>
+          <div>
+            <p className="funfact__kicker">Did you know?</p>
+            <h3 id={`${f.id}-title`}>{f.title}</h3>
+            <p>
+              <RichText text={f.body} />
+            </p>
+            <Source item={f} />
+          </div>
+        </aside>
+      ))}
+    </div>
+  )
+}
+
+export function BulbIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18h6M10 21h4" />
+      <path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z" />
+    </svg>
   )
 }
 

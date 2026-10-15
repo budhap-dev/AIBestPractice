@@ -1,0 +1,215 @@
+[
+  {
+    "id": "term-model",
+    "title": "AI model",
+    "short": "The program that writes Copilot’s answers.",
+    "body": "The program that writes Copilot’s answers. It learned patterns from huge amounts of text and code, and predicts a useful reply to what you send. Copilot lets you choose between several models.",
+    "analogy": "A very well-read colleague who has never seen your project.",
+    "match": [
+      "model"
+    ],
+    "tags": [
+      "llm",
+      "model"
+    ]
+  },
+  {
+    "id": "term-prompt",
+    "title": "Prompt",
+    "short": "What you type to Copilot.",
+    "body": "What you type to Copilot: a question, a task or an instruction. The clearer it is, the fewer rounds you need.",
+    "analogy": "The brief you give a contractor.",
+    "match": [
+      "prompt"
+    ],
+    "tags": [
+      "prompt"
+    ]
+  },
+  {
+    "id": "term-context",
+    "title": "Context",
+    "short": "Everything the model sees when it answers.",
+    "body": "Everything Copilot sends to the model with your prompt: the chat so far, files you attach, instruction files and tool results. The model only knows what is in the context. It has no other memory of your project.",
+    "analogy": "A whiteboard. Whatever is written on it is all the model can see.",
+    "match": [
+      "context"
+    ],
+    "tags": [
+      "context"
+    ]
+  },
+  {
+    "id": "term-token",
+    "title": "Token",
+    "short": "The chunk of text models read and bill in.",
+    "body": "The unit models read, and the unit usage is measured in. A token is a chunk of text, often part of a word: in English, a token is roughly three-quarters of a word on average. Code and symbols usually take more.",
+    "analogy": "Syllables. Long or unusual words take several.",
+    "match": [
+      "token"
+    ],
+    "tags": [
+      "token",
+      "billing"
+    ]
+  },
+  {
+    "id": "term-window",
+    "title": "Context window",
+    "short": "The most context a model can take at once.",
+    "body": "The most context a model can take in one request, measured in tokens. As a chat nears the limit, older parts get summarised or dropped and answers get worse.",
+    "analogy": "The size of the whiteboard.",
+    "match": [
+      "context window",
+      "window"
+    ],
+    "tags": [
+      "context window"
+    ]
+  },
+  {
+    "id": "term-history",
+    "title": "Chat history",
+    "short": "Every prompt and reply in the current chat.",
+    "body": "Every prompt and reply in the current chat. It is sent again with each new prompt, which is why long chats get slower and cost more.",
+    "analogy": "Rereading the whole email thread before every reply.",
+    "match": [
+      "history"
+    ],
+    "tags": [
+      "history",
+      "session"
+    ]
+  },
+  {
+    "id": "term-agent",
+    "title": "Agent",
+    "short": "Copilot acting, not just answering.",
+    "body": "A Copilot role that doesn’t just answer. It works out the steps, edits files, runs commands and checks the results, repeating until the task is done or it needs you.",
+    "analogy": "A junior developer you supervise, rather than a search engine.",
+    "match": [
+      "agent"
+    ],
+    "tags": [
+      "agent mode"
+    ]
+  },
+  {
+    "id": "term-tool",
+    "title": "Tool",
+    "short": "An action an agent can take.",
+    "body": "An action an agent can take, such as reading a file, searching the code, running a terminal command or fetching a web page. Whatever a tool returns is added to the context.",
+    "analogy": "The agent’s hands and eyes.",
+    "match": [
+      "tool"
+    ],
+    "tags": [
+      "tools"
+    ]
+  },
+  {
+    "id": "term-hallucination",
+    "title": "Hallucination",
+    "short": "A confident answer that is wrong.",
+    "body": "A confident answer that is wrong, such as a function, setting or package that doesn’t exist. Models predict likely text. They don’t check facts unless a tool, a test or you do.",
+    "analogy": "A colleague bluffing instead of saying “I don’t know”.",
+    "match": [
+      "invent",
+      "hallucinat"
+    ],
+    "tags": [
+      "accuracy"
+    ]
+  },
+  {
+    "id": "term-credits",
+    "title": "AI credits",
+    "short": "How Copilot usage is billed.",
+    "body": "How Copilot measures usage: each request costs credits based on the model and the tokens used. Bigger models and bigger contexts cost more.",
+    "analogy": "A phone plan billed by the minute, where some numbers cost more to call.",
+    "match": [
+      "credit",
+      "bill",
+      "cost"
+    ],
+    "tags": [
+      "billing",
+      "cost"
+    ],
+    "sourceUrl": "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals"
+  },
+  {
+    "id": "term-instructions",
+    "title": "Instruction file",
+    "short": "Team rules Copilot adds to every request.",
+    "body": "A Markdown file in your repo, such as .github/copilot-instructions.md, whose rules Copilot adds to requests automatically. You write the team’s conventions once instead of in every prompt.",
+    "analogy": "The onboarding notes you hand every new starter.",
+    "match": [
+      "instruction"
+    ],
+    "tags": [
+      "instructions",
+      "team"
+    ],
+    "sourceUrl": "https://code.visualstudio.com/docs/agent-customization/custom-instructions"
+  },
+  {
+    "id": "term-suggestion",
+    "title": "Inline suggestion",
+    "short": "Grey ghost text offered as you type.",
+    "body": "The grey “ghost text” Copilot offers as you type in the editor. Press Tab to accept it, or keep typing to ignore it.",
+    "analogy": "Autocomplete on your phone, for whole lines of code.",
+    "match": [
+      "suggestion"
+    ],
+    "tags": [
+      "completions"
+    ],
+    "sourceUrl": "https://code.visualstudio.com/docs/editing/ai-powered-suggestions"
+  },
+  {
+    "id": "term-compact",
+    "title": "Compaction",
+    "short": "Shrinking the chat into a short summary.",
+    "body": "Replacing a long chat history with a short summary, so it takes fewer tokens. /compact does it when you ask; VS Code also does it automatically when the window fills.",
+    "analogy": "Wiping the whiteboard but keeping a sticky note of the key points.",
+    "match": [
+      "compact",
+      "summaris"
+    ],
+    "tags": [
+      "compact",
+      "summary"
+    ],
+    "sourceUrl": "https://code.visualstudio.com/docs/agents/run/sessions/manage-sessions"
+  },
+  {
+    "id": "term-diff",
+    "title": "Diff",
+    "short": "A before-and-after view of a change.",
+    "body": "A view of exactly what changed in a file: removed lines and added lines. Reading the diff is how you check Copilot’s work before you keep it.",
+    "analogy": "Tracked changes in a Word document.",
+    "match": [
+      "diff",
+      "review"
+    ],
+    "tags": [
+      "review"
+    ]
+  },
+  {
+    "id": "term-mcp",
+    "title": "MCP server",
+    "short": "An add-on that gives the agent extra tools.",
+    "body": "An add-on that gives the agent extra tools, such as access to a database, an issue tracker or a browser. MCP stands for Model Context Protocol.",
+    "analogy": "A plug-in adapter that lets the agent use one more system.",
+    "match": [
+      "MCP"
+    ],
+    "tags": [
+      "mcp",
+      "tools"
+    ],
+    "sourceUrl": "https://code.visualstudio.com/docs/copilot/customization/mcp-servers"
+  }
+]
