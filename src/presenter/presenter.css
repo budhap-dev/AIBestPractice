@@ -1617,7 +1617,8 @@ html.presenting body {
 }
 
 [data-design='classic'] .slide__frame--section,
-[data-design='classic'] .slide__frame--title {
+[data-design='classic'] .slide__frame--title,
+[data-design='classic'] .slide__frame--thanks {
   --slide-bg: color-mix(in srgb, var(--accent) 6%, var(--surface));
 }
 
@@ -1642,7 +1643,8 @@ html.presenting body {
 }
 
 [data-design='bold'] .slide__frame--section::after,
-[data-design='bold'] .slide__frame--title::after {
+[data-design='bold'] .slide__frame--title::after,
+[data-design='bold'] .slide__frame--thanks::after {
   right: -6cqw;
   bottom: -10cqw;
   width: 56cqw;
@@ -1744,14 +1746,14 @@ html.presenting body {
 }
 
 /* Cover-style slides: the picture is large and sits beside the words. */
-:is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement) .slide__art {
+:is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement, .slide__frame--thanks) .slide__art {
   top: 50%;
   right: 5cqw;
   width: 30cqw;
   translate: 0 -50%;
 }
 
-:is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement) .slide__inner {
+:is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement, .slide__frame--thanks) .slide__inner {
   padding-right: 38cqw;
 }
 
@@ -2051,11 +2053,13 @@ html.presenting body {
   display: grid;
   place-items: center;
   border-radius: 6px;
-  background: var(--surface);
+  /* Dressed as the "One more thing…" slide that comes just before. */
+  background: #07090c;
+  color: #fff;
   box-shadow: 0 20px 60px -10px rgb(0 0 0 / 0.5);
   transform-origin: 0 0;
   pointer-events: none;
-  animation: peel 1.8s cubic-bezier(0.55, 0, 0.3, 1) 0.4s both;
+  animation: peel 1.8s cubic-bezier(0.55, 0, 0.3, 1) 0.2s both;
 }
 
 .peel::after {
@@ -2065,13 +2069,13 @@ html.presenting body {
   bottom: 0;
   width: 0;
   aspect-ratio: 1;
-  background: linear-gradient(315deg, var(--deck-bg-flat, transparent) 50%, color-mix(in srgb, var(--text) 18%, var(--surface)) 50%, var(--surface-2));
+  background: linear-gradient(315deg, transparent 50%, #2a2f38 50%, #12161c);
   box-shadow: -6px -6px 18px rgb(0 0 0 / 0.2);
-  animation: curl 1.8s cubic-bezier(0.55, 0, 0.3, 1) 0.4s both;
+  animation: curl 1.8s cubic-bezier(0.55, 0, 0.3, 1) 0.2s both;
 }
 
 .peel__title {
-  font-size: max(24px, 5.4cqw);
+  font-size: max(24px, 7.2cqw);
   font-weight: 800;
   letter-spacing: -0.035em;
 }
@@ -2080,6 +2084,9 @@ html.presenting body {
   0%,
   25% {
     transform: none;
+    opacity: 1;
+  }
+  85% {
     opacity: 1;
   }
   100% {
@@ -2242,14 +2249,14 @@ html.presenting body {
   }
 
   .slide__art,
-  :is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement) .slide__art {
+  :is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement, .slide__frame--thanks) .slide__art {
     top: 56px;
     right: 12px;
     width: 22cqw;
     translate: none;
   }
 
-  :is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement) .slide__inner {
+  :is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement, .slide__frame--thanks) .slide__inner {
     padding-right: 16px;
   }
 
@@ -2283,9 +2290,27 @@ html.presenting body {
   }
 }
 
+/* The picture and footer arrive once the slide has peeled away. */
+.has-peel .slide__art,
+.has-peel .slide__foot {
+  animation: art-after-peel 0.5s var(--ease-out) 1.9s both;
+}
+
+@keyframes art-after-peel {
+  from {
+    opacity: 0;
+    scale: 0.8;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .peel {
     display: none;
+  }
+
+  .has-peel .slide__art,
+  .has-peel .slide__foot {
+    animation: none;
   }
 
   .slide--enter .teaser__title {

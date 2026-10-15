@@ -465,5 +465,8 @@
   },
   "build-prompt": {
     "scene": "rocket"
+  },
+  "thanks": {
+    "scene": "flag"
   }
 }
