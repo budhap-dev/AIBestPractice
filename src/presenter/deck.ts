@@ -20,6 +20,8 @@ interface Base {
   title: string
   // Number of reveal steps: each press of → shows one more fragment before moving on.
   steps: number
+  // Estimated time to read the slide once every step is shown, in seconds. Filled in by timed().
+  readSeconds?: number
 }
 
 export type Slide = Base &
@@ -164,6 +166,56 @@ function build(): Slide[] {
   return deck
 }
 
-export const deck = build()
+// ---------- Time to read ----------
+// Keys that hold ids, links or flags rather than words shown on the slide.
+const NOT_TEXT = new Set(['id', 'section', 'kind', 'group', 'steps', 'tags', 'sourceUrl', 'verify', 'number', 'total', 'start', 'part', 'correct', 'readSeconds'])
+
+function countWords(value: unknown): number {
+  if (typeof value === 'string') return value.split(/\s+/).filter(Boolean).length
+  if (Array.isArray(value)) return value.reduce((n: number, v) => n + countWords(v), 0)
+  if (value && typeof value === 'object') return Object.entries(value).reduce((n, [k, v]) => (NOT_TEXT.has(k) ? n : n + countWords(v)), 0)
+  return 0
+}
+
+// Text a slide shows that lives outside its own data (meta.json, section names).
+function sharedText(slide: Slide): string[] {
+  switch (slide.kind) {
+    case 'title':
+      return [meta.company, meta.headline, meta.tagline, meta.demoAudience, meta.product, meta.owner]
+    case 'agenda':
+      return [meta.product, meta.demoAudience, ...sections.map((s) => s.nav)]
+    case 'end':
+      return [meta.closing, meta.product, meta.lastReviewed, meta.owner]
+    default:
+      return [sections.find((s) => s.id === slide.section)?.nav ?? '']
+  }
+}
+
+function timed(slides: Slide[]): Slide[] {
+  const wpm = meta.readingWordsPerMinute > 0 ? meta.readingWordsPerMinute : 200
+  return slides.map((slide) => {
+    const words = countWords(slide) + countWords(sharedText(slide))
+    // Round up to the nearest 5 seconds; nothing reads in under 5.
+    const readSeconds = Math.max(5, Math.ceil(((words / wpm) * 60) / 5) * 5)
+    return { ...slide, readSeconds }
+  })
+}
+
+export const deck = timed(build())
+
+export const slideSeconds = (slide: Slide) => slide.readSeconds ?? 0
+
+export const deckSeconds = deck.reduce((n, s) => n + slideSeconds(s), 0)
+
+// Reading time left from this slide (included) to the end.
+export const secondsFrom = (index: number) => deck.slice(index).reduce((n, s) => n + slideSeconds(s), 0)
+
+export function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds} s`
+  const min = Math.floor(seconds / 60)
+  const sec = seconds % 60
+  if (seconds >= 600) return `${Math.round(seconds / 60)} min`
+  return sec ? `${min} min ${sec} s` : `${min} min`
+}
 
 export const sectionStart = (id: string) => Math.max(0, deck.findIndex((s) => s.kind === 'section' && s.section === id))

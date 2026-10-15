@@ -8,6 +8,7 @@ Phase: all phases done (PR 1 app, PR 2 polish + docs).
 - Responsive pass at 375/768/1280 in light and dark; README; VERIFY.md.
 
 ## Decisions
+- Audience (endUsers, demoAudience) and readingWordsPerMinute live in meta.json; slide read time = words shown when fully revealed / wpm, rounded up to 5 s.
 - Presenter mode (#/present/n): deck built from content in src/presenter/deck.ts; fragments reveal per key press; 4 slide transitions.
 - Themes: appearance + 6 accent palettes via data-palette and light-dark(); circular view-transition reveal.
 - One page per section with hash routing (#/section/item); legacy #id links redirect. Print view renders cheat sheet + do's and don'ts.

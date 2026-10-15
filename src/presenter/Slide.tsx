@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { meta, sections } from '../content'
 import { CodeBlock, Kbd } from '../components/ui'
-import type { Slide } from './deck'
+import { deckSeconds, formatDuration, type Slide } from './deck'
 
 // A fragment is shown once the step count passes its position.
 const frag = (step: number, k: number, extra = '') => `frag${step > k ? ' is-in' : ''}${extra ? ` ${extra}` : ''}`
@@ -31,6 +31,9 @@ export function SlideView({ slide, step }: { slide: Slide; step: number }) {
           <p className="slide__eyebrow intro">{meta.company} · Engineering</p>
           <h1 className="slide__hero intro">{meta.headline}</h1>
           <p className="slide__lede intro">{meta.tagline}</p>
+          <p className="slide__audience intro">
+            <strong>For</strong> {meta.demoAudience}
+          </p>
           <p className="slide__by intro">
             {meta.product} · {meta.owner}
           </p>
@@ -42,6 +45,7 @@ export function SlideView({ slide, step }: { slide: Slide; step: number }) {
       body = (
         <>
           <Head eyebrow={meta.product} title={slide.title} />
+          <p className="slide__lede agenda__time intro">About {formatDuration(deckSeconds)} to read, one point at a time.</p>
           <ol className="agenda">
             {sections.map((s, i) => (
               <li key={s.id} className={frag(step, i)}>

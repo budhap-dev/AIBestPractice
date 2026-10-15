@@ -17,6 +17,12 @@ export interface Meta {
   closing: string
   company: string
   owner: string
+  // Who uses the app day to day.
+  endUsers: string
+  // Who the live demo or presentation is for.
+  demoAudience: string
+  // Reading speed used for each slide's "time to read" estimate.
+  readingWordsPerMinute: number
   lastReviewed: string
   policyUrl: string
   copilotVersionNote: string
