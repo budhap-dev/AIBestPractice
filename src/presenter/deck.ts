@@ -1,7 +1,8 @@
 // Builds the presenter deck from the guide content. Edit the JSON in src/content, not this file.
-import { beyond, commands, contextSources, memoryFiles, meta, modes, quiz, rules, sections, security, templates, workflow } from '../content'
+import { beyond, commands, contextSources, facts, glossary, memoryFiles, meta, modes, quiz, rules, sections, security, takeaways, templates, termsIn, workflow } from '../content'
 import { ACTION_LABEL, GROUPS, RULE_GROUPS } from '../content/labels'
-import type { Command, QuizQuestion, Rule } from '../content/types'
+import type { Command, FunFact, QuizQuestion, Rule, Takeaway } from '../content/types'
+import { diagramSteps, diagramText, type DiagramId } from '../components/diagramData'
 
 export interface Card {
   id: string
@@ -28,24 +29,39 @@ export type Slide = Base &
   (
     | { kind: 'title' }
     | { kind: 'agenda' }
-    | { kind: 'section'; number: number; intro: string }
+    | { kind: 'section'; number: number; intro: string; terms: string[] }
     | { kind: 'cards'; part?: string; cards: Card[] }
     | { kind: 'detail'; eyebrow: string; body: string; points: { label: string; text: string }[]; code?: { label: string; text: string }; tag?: string }
     | { kind: 'table'; part?: string; group: string; rows: Command[] }
     | { kind: 'steps'; part?: string; start: number; items: Card[] }
     | { kind: 'compare'; part?: string; group: string; dos: Rule[]; donts: Rule[] }
     | { kind: 'quiz'; number: number; total: number; question: QuizQuestion }
+    | { kind: 'diagram'; eyebrow: string; diagram: DiagramId }
+    | { kind: 'facts'; facts: FunFact[] }
+    | { kind: 'summary'; items: Takeaway[] }
     | { kind: 'end' }
   )
 
 function chunk<T>(list: T[], size: number): T[][] {
-  // Spread items evenly: 7 in chunks of 4 becomes 4 + 3, 10 in chunks of 4 becomes 4 + 3 + 3.
+  // Spread items evenly: 7 in chunks of 3 becomes 3 + 2 + 2, 10 in chunks of 4 becomes 4 + 3 + 3.
   const count = Math.ceil(list.length / size)
-  const per = Math.ceil(list.length / count)
-  return Array.from({ length: count }, (_, i) => list.slice(i * per, (i + 1) * per))
+  const base = Math.floor(list.length / count)
+  const extra = list.length % count
+  const out: T[][] = []
+  let at = 0
+  for (let i = 0; i < count; i++) {
+    const n = base + (i < extra ? 1 : 0)
+    out.push(list.slice(at, at + n))
+    at += n
+  }
+  return out
 }
 
 const part = (i: number, n: number) => (n > 1 ? `${i + 1} of ${n}` : undefined)
+
+function diagramSlide(section: string, eyebrow: string, title: string, diagram: DiagramId): Slide {
+  return { kind: 'diagram', id: `diagram-${diagram}`, section, eyebrow, title, diagram, steps: diagramSteps(diagram) }
+}
 
 function cardSlides(section: string, title: string, cards: Card[], size = 3): Slide[] {
   const parts = chunk(cards, size)
@@ -59,14 +75,25 @@ function build(): Slide[] {
   ]
 
   sections.forEach((s, i) => {
-    deck.push({ kind: 'section', id: `section-${s.id}`, section: s.id, title: s.title, number: i + 1, intro: s.intro, steps: 1 })
+    const terms = s.id === 'key-terms' ? [] : termsIn(`${s.title} ${s.intro}`).map((t) => t.title)
+    deck.push({ kind: 'section', id: `section-${s.id}`, section: s.id, title: s.title, number: i + 1, intro: s.intro, terms, steps: 1 })
 
     switch (s.id) {
+      case 'key-terms':
+        deck.push(diagramSlide(s.id, s.nav, 'What happens when you press Enter', 'request'))
+        deck.push(...cardSlides(s.id, 'The words, in plain English', glossary.map((t) => ({ id: t.id, title: t.title, body: t.body, example: `Think of it as: ${t.analogy}` }))))
+        break
+
       case 'mental-model':
         deck.push(...cardSlides(s.id, 'What fills the context', contextSources.map((c) => ({ id: c.id, title: c.title, body: c.body, example: c.example }))))
         break
 
+      case 'prompt-cost':
+        deck.push(diagramSlide(s.id, s.nav, 'Same bug, two prompts', 'snowball'), diagramSlide(s.id, s.nav, 'Anatomy of a prompt that lands', 'anatomy'))
+        break
+
       case 'modes':
+        deck.push(diagramSlide(s.id, s.nav, 'More power, more cost', 'modes'))
         for (const m of modes) {
           deck.push({
             kind: 'detail',
@@ -93,13 +120,15 @@ function build(): Slide[] {
         break
 
       case 'workflow': {
-        const steps = workflow.steps.map((w) => ({ id: w.id, title: w.title, body: w.body }))
-        const parts = chunk(steps, 4)
+        const steps = workflow.steps.map((w) => ({ id: w.id, title: w.title, body: w.body, code: w.prompt }))
+        // Three per slide: steps with a "Try" prompt need the room.
+        const parts = chunk(steps, 3)
         let start = 1
         parts.forEach((items, j) => {
           deck.push({ kind: 'steps', id: `workflow-steps-${j}`, section: s.id, title: s.title, part: part(j, parts.length), start, items, steps: items.length })
           start += items.length
         })
+        deck.push(diagramSlide(s.id, s.nav, 'When the chat gets long', 'chat-flow'))
         deck.push(
           ...cardSlides(
             s.id,
@@ -126,6 +155,7 @@ function build(): Slide[] {
         break
 
       case 'team-memory':
+        deck.push(diagramSlide(s.id, s.nav, 'What gets sent, and when', 'memory'))
         deck.push(...cardSlides(s.id, s.nav, memoryFiles.map((m) => ({ id: m.id, title: m.title, body: m.when, code: m.path }))))
         break
 
@@ -159,7 +189,15 @@ function build(): Slide[] {
       case 'beyond':
         deck.push(...cardSlides(s.id, s.nav, beyond.map((c) => ({ id: c.id, title: c.title, body: c.body }))))
         break
+
+      case 'wrap-up':
+        deck.push({ kind: 'summary', id: 'summary', section: s.id, title: s.title, items: takeaways, steps: takeaways.length })
+        break
     }
+
+    // A "Did you know?" break at the end of each section that has facts.
+    const own = facts.filter((f) => f.section === s.id)
+    if (own.length) deck.push({ kind: 'facts', id: `facts-${s.id}`, section: s.id, title: 'Did you know?', facts: own, steps: own.length })
   })
 
   deck.push({ kind: 'end', id: 'end', title: 'Questions?', steps: 0 })
@@ -168,7 +206,7 @@ function build(): Slide[] {
 
 // ---------- Time to read ----------
 // Keys that hold ids, links or flags rather than words shown on the slide.
-const NOT_TEXT = new Set(['id', 'section', 'kind', 'group', 'steps', 'tags', 'sourceUrl', 'verify', 'number', 'total', 'start', 'part', 'correct', 'readSeconds'])
+const NOT_TEXT = new Set(['id', 'section', 'kind', 'group', 'steps', 'tags', 'sourceUrl', 'verify', 'number', 'total', 'start', 'part', 'correct', 'readSeconds', 'diagram'])
 
 function countWords(value: unknown): number {
   if (typeof value === 'string') return value.split(/\s+/).filter(Boolean).length
@@ -186,6 +224,8 @@ function sharedText(slide: Slide): string[] {
       return [meta.product, meta.demoAudience, ...sections.map((s) => s.nav)]
     case 'end':
       return [meta.closing, meta.product, meta.lastReviewed, meta.owner]
+    case 'diagram':
+      return diagramText(slide.diagram)
     default:
       return [sections.find((s) => s.id === slide.section)?.nav ?? '']
   }

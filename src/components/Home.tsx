@@ -26,6 +26,9 @@ export function Home() {
         <a className="btn btn--outline" href={href({ kind: 'section', id: 'cheat-sheet' })}>
           Open the cheat sheet
         </a>
+        <a className="btn btn--outline" href={href({ kind: 'section', id: 'key-terms' })}>
+          New to AI? Start with the key terms
+        </a>
         <a className="btn btn--ghost" href={href({ kind: 'present', slide: 1 })}>
           Present the guide
         </a>

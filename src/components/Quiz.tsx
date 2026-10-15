@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { quiz } from '../content'
+import { celebrate } from './confetti'
 
 export function Quiz() {
   const [index, setIndex] = useState(0)
@@ -36,10 +37,12 @@ export function Quiz() {
   const q = quiz[index]
   const answered = picked !== null
 
-  function pick(i: number) {
+  function pick(i: number, button: HTMLButtonElement) {
     if (answered) return
     setPicked(i)
-    if (q.options[i].correct) setScore((s) => s + 1)
+    if (!q.options[i].correct) return
+    setScore((s) => s + 1)
+    celebrate({ from: button })
   }
 
   return (
@@ -58,7 +61,7 @@ export function Quiz() {
         {q.options.map((o, i) => {
           const state = !answered ? '' : o.correct ? ' is-correct' : i === picked ? ' is-wrong' : ' is-dim'
           return (
-            <button key={i} type="button" className={`quiz__opt${state}`} onClick={() => pick(i)} aria-pressed={picked === i} disabled={answered && i !== picked && !o.correct}>
+            <button key={i} type="button" className={`quiz__opt${state}`} onClick={(e) => pick(i, e.currentTarget)} aria-pressed={picked === i} disabled={answered && i !== picked && !o.correct}>
               <span className="quiz__letter" aria-hidden="true">
                 {String.fromCharCode(65 + i)}
               </span>
@@ -78,6 +81,8 @@ export function Quiz() {
           className="btn btn--primary"
           disabled={!answered}
           onClick={() => {
+            // A strong finish gets the big celebration.
+            if (index === quiz.length - 1 && score >= quiz.length - 1) celebrate({ size: 'big' })
             setIndex((i) => i + 1)
             setPicked(null)
           }}

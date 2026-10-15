@@ -12,20 +12,34 @@ import quizJson from './quiz.json'
 import meterJson from './meter.json'
 import securityJson from './security.json'
 import beyondJson from './beyond.json'
+import factsJson from './facts.json'
+import summaryJson from './summary.json'
+import promptCostJson from './promptCost.json'
+import diagramsJson from './diagrams.json'
+import glossaryJson from './glossary.json'
 import type {
   ChecklistItem,
   Command,
   ContextSource,
   Decision,
+  FlowQuestion,
+  FunFact,
+  GlossaryTerm,
   Item,
   MemoryFile,
+  MemoryLane,
   Meta,
   MeterAction,
   Mode,
+  ModeRung,
   ModelTier,
+  PromptPart,
+  PromptScenario,
+  RequestFlow,
   QuizQuestion,
   Rule,
   SectionInfo,
+  Takeaway,
   Template,
   WorkflowStep,
 } from './types'
@@ -52,11 +66,31 @@ export const meter = meterJson as {
 }
 export const security = securityJson as Item[]
 export const beyond = beyondJson as Item[]
+export const facts = factsJson as FunFact[]
+export const takeaways = summaryJson as Takeaway[]
+export const promptCost = promptCostJson as {
+  note: string
+  instructions: number
+  scenarios: PromptScenario[]
+  anatomy: PromptPart[]
+}
+export const glossary = glossaryJson as GlossaryTerm[]
+export const diagrams = diagramsJson as {
+  request: RequestFlow
+  modes: ModeRung[]
+  chatFlow: { start: string; questions: FlowQuestion[]; otherwise: Decision['action']; otherwiseDetail: string }
+  memory: { requests: string[]; lanes: MemoryLane[]; note: string }
+}
 
 export function section(id: string): SectionInfo {
   const found = sections.find((s) => s.id === id)
   if (!found) throw new Error(`Unknown section "${id}" in sections.json`)
   return found
+}
+
+// Glossary terms a piece of text uses, in glossary order, for the "New to these words?" links.
+export function termsIn(text: string): GlossaryTerm[] {
+  return glossary.filter((t) => t.match.some((m) => new RegExp(`\\b${m}`, 'i').test(text)))
 }
 
 export interface SearchEntry {
@@ -92,6 +126,9 @@ export const searchIndex: SearchEntry[] = (() => {
   add('templates', templates, (t: Template) => t.prompt)
   add('security', security)
   add('beyond', beyond)
+  add('wrap-up', takeaways)
+  add('key-terms', glossary, (t: GlossaryTerm) => `${t.short} ${t.analogy}`)
+  for (const f of facts) add(f.section, [f])
   for (const s of sections) {
     entries.push({ id: s.id, title: s.title, text: `${s.title} ${s.nav} ${s.intro}`.toLowerCase(), sectionId: s.id, sectionNav: s.nav })
   }

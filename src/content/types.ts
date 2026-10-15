@@ -118,3 +118,76 @@ export interface ModelTier {
   // Illustrative price per token relative to a standard model.
   relativeCost: number
 }
+
+// "Did you know?" facts, shown on their section's page and as a slide after that section.
+export interface FunFact extends Item {
+  section: string
+}
+
+// One line of the wrap-up, linking back to the section with the detail.
+export interface Takeaway extends Item {
+  section: string
+}
+
+// ---------- Prompt cost ----------
+export interface PromptRound {
+  you: string
+  copilot: string
+  // Tokens this round adds: the prompt, anything attached or pasted, and tool output.
+  added: number
+  // Tokens in Copilot's reply. It joins the history for the next round.
+  reply: number
+}
+
+export interface PromptScenario {
+  id: string
+  label: string
+  prompt: string
+  outcome: string
+  rounds: PromptRound[]
+}
+
+export type PromptPartKind = 'where' | 'symptom' | 'evidence' | 'limits' | 'done'
+
+export interface PromptPart {
+  kind: PromptPartKind
+  label: string
+  text: string
+}
+
+// ---------- Diagrams on the section pages and in the deck ----------
+export interface ModeRung {
+  mode: string
+  does: string
+  changes: string
+  cost: string
+}
+
+export interface FlowQuestion {
+  question: string
+  yes: Decision['action']
+  yesDetail: string
+}
+
+export interface MemoryLane {
+  label: string
+  files: { name: string; on: boolean[] }[]
+}
+
+// Plain-English definitions for people new to AI.
+export interface GlossaryTerm extends Item {
+  // One line, used in tooltips and the term chips under each page intro.
+  short: string
+  analogy: string
+  // Words that mean a page's title or intro uses this term (matched at the start of a word, any case).
+  match: string[]
+}
+
+export interface RequestFlow {
+  // `show` adds the packed context or the token split under a step.
+  steps: { title: string; body: string; show?: 'packed' | 'tokens' }[]
+  packed: string[]
+  tokens: string[]
+  tokensNote: string
+  loop: string
+}

@@ -1,5 +1,6 @@
 import { useEffect, useEffectEvent, useRef, useState, type CSSProperties } from 'react'
 import { meta, sections } from '../content'
+import { celebrate } from '../components/confetti'
 import { ThemeMenu } from '../components/ThemeMenu'
 import { navigate } from '../router'
 import { deck, deckSeconds, formatDuration, secondsFrom, slideSeconds } from './deck'
@@ -11,9 +12,24 @@ const TRANSITIONS = [
   { id: 'fade', label: 'Fade' },
   { id: 'zoom', label: 'Zoom' },
   { id: 'flip', label: 'Flip' },
+  { id: 'page', label: 'Page turn' },
+  { id: 'cube', label: 'Cube' },
+  { id: 'wipe', label: 'Wipe' },
+  { id: 'circle', label: 'Circle' },
+  { id: 'rise', label: 'Rise' },
+  { id: 'random', label: 'Random' },
 ] as const
 
 type Transition = (typeof TRANSITIONS)[number]['id']
+type Effect = Exclude<Transition, 'random'>
+
+const EFFECTS = TRANSITIONS.map((t) => t.id).filter((id): id is Effect => id !== 'random')
+// Random picks a fresh effect for every slide change, never the same one twice in a row.
+const randomEffect = (not: Effect) => {
+  const pool = EFFECTS.filter((e) => e !== not)
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
 type Overlay = 'none' | 'overview' | 'help'
 
 const TRANSITION_KEY = 'cfg-transition'
@@ -49,6 +65,7 @@ export function Presenter({ slide }: { slide: number }) {
   const [overlay, setOverlay] = useState<Overlay>('none')
   const [blank, setBlank] = useState(false)
   const [transition, setTransition] = useState<Transition>(readTransition)
+  const [effect, setEffect] = useState<Effect>('slide')
   const [idle, setIdle] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const root = useRef<HTMLDivElement>(null)
@@ -69,12 +86,22 @@ export function Presenter({ slide }: { slide: number }) {
       return
     }
     leaveKey.current += 1
+    if (transition === 'random') setEffect(randomEffect(effect))
     setLeaving({ index, step, key: leaveKey.current })
     setPos({ index: to, step: toStep, dir: to > index ? 1 : -1 })
     navigate({ kind: 'present', slide: to + 1 }, { replace: true })
   }
 
-  const next = () => (step < current.steps ? go(index, step + 1) : index < LAST && go(index + 1, 0))
+  function next() {
+    if (step < current.steps) {
+      go(index, step + 1)
+      // The quiz answer is revealed on its last step.
+      if (current.kind === 'quiz' && step + 1 === current.steps) celebrate()
+    } else if (index < LAST) {
+      go(index + 1, 0)
+      if (deck[index + 1].kind === 'end') celebrate({ size: 'big' })
+    }
+  }
   const prev = () => (step > 0 ? go(index, step - 1) : index > 0 && go(index - 1, deck[index - 1].steps))
 
   function exit() {
@@ -213,7 +240,8 @@ export function Presenter({ slide }: { slide: number }) {
     <div
       ref={root}
       className={`presenter${idle && overlay === 'none' ? ' is-idle' : ''}`}
-      data-transition={transition}
+      data-transition={transition === 'random' ? effect : transition}
+      data-dir={pos.dir > 0 ? 'next' : 'prev'}
       style={{ '--dir': pos.dir } as CSSProperties}
       tabIndex={-1}
       role="region"
