@@ -167,7 +167,9 @@ function LiveControls() {
   )
 }
 
-export function SlideView({ slide, step, number }: { slide: Slide; step: number; number?: number }) {
+// `still` draws the slide without its one-off entrance effects: for the copy that animates out,
+// and when stepping back to a slide.
+export function SlideView({ slide, step, number, still }: { slide: Slide; step: number; number?: number; still?: boolean }) {
   // The slides being presented: the short talk or the full deck.
   const slides = useDeckControls()?.slides ?? fullDeck
   let body: ReactNode
@@ -532,9 +534,12 @@ export function SlideView({ slide, step, number }: { slide: Slide; step: number;
     case 'live':
       body = (
         <>
-          <div className="peel" aria-hidden="true">
-            <span className="peel__title">{fullDeck.find((s) => s.kind === 'end')?.title}</span>
-          </div>
+          {/* The "One more thing…" slide peels off to show the app underneath, once, on the way forward. */}
+          {!still && (
+            <div className="peel" aria-hidden="true">
+              <span className="peel__title">{finale.teaser.title}</span>
+            </div>
+          )}
           <Head eyebrow={finale.live.eyebrow} title={slide.title} />
           <p className="slide__lede intro">{finale.live.body}</p>
           <ul className="live-stats">
@@ -584,11 +589,24 @@ export function SlideView({ slide, step, number }: { slide: Slide; step: number;
         </div>
       )
       break
+
+    case 'thanks':
+      body = (
+        <div className="slide__center thanks">
+          <p className="slide__eyebrow intro">{finale.thanks.eyebrow}</p>
+          <h2 className="slide__hero intro">{slide.title}</h2>
+          <p className="slide__lede intro">{finale.thanks.body}</p>
+          <p className="slide__by intro">
+            {meta.product} · {meta.owner}
+          </p>
+        </div>
+      )
+      break
   }
 
   const framed = slide.kind !== 'teaser'
   return (
-    <div className={`slide__frame slide__frame--${slide.kind}`}>
+    <div className={`slide__frame slide__frame--${slide.kind}${slide.kind === 'live' && !still ? ' has-peel' : ''}`}>
       {slide.scene && <Illustration scene={slide.scene} className="slide__art intro" />}
       <div className={`slide__inner slide--${slide.kind}${slide.scene ? ' has-art' : ''}${slide.story?.helps && slide.story.wrong ? ' has-story' : ''}`}>
         {body}

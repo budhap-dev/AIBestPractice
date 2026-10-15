@@ -38,7 +38,7 @@ Most sections end with **Did you know?** facts, each with a docs link. Each page
 
 Select **Present** in the top bar, or **Present the guide** on the home page, to run the guide as a slide deck. Starting from a section page opens the deck at that section. The deck is built from the same content files, so it stays in sync with the guide.
 
-The deck opens as a **short talk**: 25 slides, about 13 minutes of reading (allow 25 to 30 minutes live), covering the opening story, the key diagrams, three quiz scenarios, the approval gate, the takeaways and the surprise ending. Press **S**, or use the picker in the toolbar, to switch to the **full deck** of 103 slides and back. You stay on the same slide, or move to the next one in the talk. Nothing is cut from the guide or the full deck: they stay for people to read afterwards. In the overview (**O**), slides the short talk skips are dimmed, and picking one switches to the full deck at that slide. Edit the running order in `src/content/talk.json`.
+The deck opens as a **short talk**: 26 slides, about 13 minutes of reading (allow 25 to 30 minutes live), covering the opening story, the key diagrams, three quiz scenarios, the approval gate, the takeaways and the surprise ending. Press **S**, or use the picker in the toolbar, to switch to the **full deck** of 104 slides and back. You stay on the same slide, or move to the next one in the talk. Nothing is cut from the guide or the full deck: they stay for people to read afterwards. In the overview (**O**), slides the short talk skips are dimmed, and picking one switches to the full deck at that slide. Edit the running order in `src/content/talk.json`.
 
 Each press of → reveals the next point on a slide, then moves to the next slide. Quiz slides show the options one by one and reveal the answer last.
 
@@ -46,7 +46,7 @@ Every slide has a picture from a shared set of hand-coded SVG scenes. Every teac
 
 The deck looks like a presentation: the slide sits on a stage with a footer and slide number, and **D** (or the design picker) switches between five slide designs: Classic, Bold, Paper, Blueprint and Spotlight. Designs work with every colour theme, in light and dark.
 
-After **Questions?** there is a surprise: press → to find out. It ends on **One prompt can build this app**, linking to [prompts/build-this-app.md](prompts/build-this-app.md).
+After **Questions?** there is a surprise: press → to find out. Its last slides are **One prompt can build this app**, linking to [prompts/build-this-app.md](prompts/build-this-app.md), and a **Thank you for your patience** slide.
 
 | Key | Does |
 |---|---|

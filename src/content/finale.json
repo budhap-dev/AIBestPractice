@@ -50,5 +50,10 @@
     "body": "The stack, the content, every section, presenter mode, the diagrams, the themes and the accessibility rules, written down as a single prompt you can read and reuse.",
     "link": "Read the prompt on GitHub",
     "scan": "Scan to read the prompt"
+  },
+  "thanks": {
+    "eyebrow": "That’s a wrap",
+    "title": "Thank you for your patience",
+    "body": "Pick one habit and try it this week. The guide will be here whenever you need it."
   }
 }

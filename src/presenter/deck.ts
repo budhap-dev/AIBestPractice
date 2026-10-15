@@ -78,10 +78,11 @@ export type Slide = Base &
     | { kind: 'live' }
     | { kind: 'controls' }
     | { kind: 'prompt' }
+    | { kind: 'thanks' }
   )
 
 // Slides that frame the session rather than teach a habit: they get a picture but no story.
-const FRAMING = new Set<Slide['kind']>(['title', 'agenda', 'section', 'quiz', 'end', 'teaser', 'live', 'controls', 'prompt'])
+const FRAMING = new Set<Slide['kind']>(['title', 'agenda', 'section', 'quiz', 'end', 'teaser', 'live', 'controls', 'prompt', 'thanks'])
 export const isTeaching = (slide: Slide) => !FRAMING.has(slide.kind)
 
 function chunk<T>(list: T[], size: number): T[][] {
@@ -305,6 +306,7 @@ function build(): Slide[] {
     { kind: 'live', id: 'live-numbers', title: finale.live.title, steps: finale.live.stats.length },
     { kind: 'controls', id: 'live-controls', title: finale.controls.title, steps: 0 },
     { kind: 'prompt', id: 'build-prompt', title: finale.prompt.title, steps: 0 },
+    { kind: 'thanks', id: 'thanks', title: finale.thanks.title, steps: 0 },
   )
   return deck
 }
@@ -345,6 +347,8 @@ function sharedText(slide: Slide): string[] {
       return textOf(finale.controls)
     case 'prompt':
       return textOf(finale.prompt)
+    case 'thanks':
+      return [finale.thanks.eyebrow, finale.thanks.body, meta.product, meta.owner]
     case 'diagram':
       return diagramText(slide.diagram)
     default:

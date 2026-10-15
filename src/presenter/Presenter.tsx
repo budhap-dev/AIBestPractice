@@ -386,11 +386,11 @@ export function Presenter({ slide }: { slide: number }) {
         <div className="presenter__stage">
           {leaving && (
             <section key={`leave-${leaving.key}`} className="slide slide--leave" aria-hidden="true" inert onAnimationEnd={(e) => e.target === e.currentTarget && setLeaving(null)}>
-              <SlideView slide={leaving.slide} step={leaving.step} number={leaving.number} />
+              <SlideView slide={leaving.slide} step={leaving.step} number={leaving.number} still />
             </section>
           )}
           <section key={index} className="slide slide--enter" aria-roledescription="slide" aria-label={`${index + 1} of ${deck.length}: ${current.title}`}>
-            <SlideView slide={current} step={step} number={index + 1} />
+            <SlideView slide={current} step={step} number={index + 1} still={pos.dir < 0} />
           </section>
           {blank && <div className="presenter__blank" onClick={() => setBlank(false)} aria-hidden="true" />}
         </div>

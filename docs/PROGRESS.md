@@ -31,6 +31,8 @@ Phase: all phases done (PR 1 app, PR 2 polish + docs).
 - Short talk (talk.json): 25 of 103 slides, ~13 min read; default in presenter, S or toolbar picker switches to the full deck at the same slide. Both decks get their own New word notes, quiz numbers and timings. Overview dims skipped slides; picking one switches to full. Fixed: overview grid wider than the window; research figures shrunk by a paragraph rule.
 
 - Fixed text overlapping the Asha/Ben strip: slide children no longer shrink (flex-shrink: 0), so tall content can't spill over the story. Daily loop is a wide oval on slides; New words show one label; tighter request-flow and snowball spacing on slides. Checked for overlaps at 8 window sizes, both decks.
+- Finale: "Thank you for your patience" is now the last slide (both decks). The peel copies the "One more thing…" slide and no longer replays when the slide animates out or is revisited, which had flashed "Questions?".
+
 ## Next
 - Set `siteUrl` in meta.json once the guide is hosted, so the phone QR code points at the real address.
 - Fill company, owner and policy link in src/content/meta.json.
