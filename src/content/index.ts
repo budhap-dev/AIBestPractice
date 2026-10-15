@@ -17,8 +17,15 @@ import summaryJson from './summary.json'
 import promptCostJson from './promptCost.json'
 import diagramsJson from './diagrams.json'
 import glossaryJson from './glossary.json'
+import openingJson from './opening.json'
+import storiesJson from './stories.json'
+import finaleJson from './finale.json'
+import talkJson from './talk.json'
 import type {
+  ApprovalGate,
   ChecklistItem,
+  ContextStack,
+  DailyLoop,
   Command,
   ContextSource,
   Decision,
@@ -33,13 +40,17 @@ import type {
   Mode,
   ModeRung,
   ModelTier,
+  Opening,
+  Prefix,
   PromptPart,
   PromptScenario,
   RequestFlow,
   QuizQuestion,
   Rule,
   SectionInfo,
+  SlideStory,
   Takeaway,
+  ThenNow,
   Template,
   WorkflowStep,
 } from './types'
@@ -80,7 +91,17 @@ export const diagrams = diagramsJson as {
   modes: ModeRung[]
   chatFlow: { start: string; questions: FlowQuestion[]; otherwise: Decision['action']; otherwiseDetail: string }
   memory: { requests: string[]; lanes: MemoryLane[]; note: string }
+  thenNow: ThenNow
+  contextStack: ContextStack
+  dailyLoop: DailyLoop
+  approvalGate: ApprovalGate
+  prefixes: Prefix[]
 }
+export const opening = openingJson as Opening
+export const stories = storiesJson as Record<string, SlideStory>
+export const finale = finaleJson
+// The slides to present in a short live session; the full deck keeps everything.
+export const talk = talkJson as { label: string; note: string; slides: string[] }
 
 export function section(id: string): SectionInfo {
   const found = sections.find((s) => s.id === id)
@@ -88,9 +109,50 @@ export function section(id: string): SectionInfo {
   return found
 }
 
-// Glossary terms a piece of text uses, in glossary order, for the "New to these words?" links.
+// Each term's patterns, compiled once. A pattern that starts with a letter must match at the start of a word.
+const termPatterns = new Map(glossary.map((t) => [t.id, t.match.map((m) => new RegExp(`${/^\w/.test(m) ? '\\b' : ''}${m}`, t.caseSensitive ? '' : 'i'))]))
+
+export const usesTerm = (text: string, term: GlossaryTerm) => termPatterns.get(term.id)!.some((re) => re.test(text))
+
+// Glossary terms a piece of text uses, in glossary order.
 export function termsIn(text: string): GlossaryTerm[] {
-  return glossary.filter((t) => t.match.some((m) => new RegExp(`\\b${m}`, 'i').test(text)))
+  return glossary.filter((t) => usesTerm(text, t))
+}
+
+// Every string inside a value, skipping keys that hold ids, links or flags rather than words people read.
+const NOT_TEXT = new Set(['id', 'section', 'kind', 'group', 'tags', 'sourceUrl', 'verify', 'match', 'action', 'yes', 'otherwise', 'phase', 'show', 'mode', 'correct', 'scene'])
+
+export function textOf(value: unknown): string[] {
+  if (typeof value === 'string') return [value]
+  if (Array.isArray(value)) return value.flatMap(textOf)
+  if (value && typeof value === 'object') return Object.entries(value).flatMap(([k, v]) => (NOT_TEXT.has(k) ? [] : textOf(v)))
+  return []
+}
+
+// What each guide page shows, beyond its title and intro, so its term links cover the whole page.
+const PAGE_CONTENT: Record<string, unknown[]> = {
+  why: [opening, diagrams.thenNow],
+  'key-terms': [],
+  'mental-model': [contextSources, diagrams.contextStack, meter.actions.map((a) => [a.label, a.detail]), meter.models.map((m) => m.label)],
+  'prompt-cost': [promptCost.scenarios, promptCost.anatomy, promptCost.note],
+  modes: [modes, diagrams.modes],
+  'cheat-sheet': [commands, diagrams.prefixes],
+  workflow: [workflow, diagrams.dailyLoop, diagrams.chatFlow],
+  'dos-donts': [rules],
+  'team-memory': [memoryFiles, diagrams.memory],
+  templates: [templates],
+  quiz: [quiz],
+  security: [security, diagrams.approvalGate],
+  beyond: [beyond],
+  'wrap-up': [takeaways],
+}
+
+// Glossary terms used anywhere on a section's page. The Key terms page defines them all, so it lists none.
+export function pageTerms(id: string): GlossaryTerm[] {
+  if (id === 'key-terms') return []
+  const info = section(id)
+  const own = facts.filter((f) => f.section === id)
+  return termsIn(textOf([info.title, info.intro, PAGE_CONTENT[id] ?? [], own]).join('\n'))
 }
 
 export interface SearchEntry {
@@ -127,6 +189,7 @@ export const searchIndex: SearchEntry[] = (() => {
   add('security', security)
   add('beyond', beyond)
   add('wrap-up', takeaways)
+  add('why', [...opening.then, ...opening.research, ...opening.catch, ...opening.factors])
   add('key-terms', glossary, (t: GlossaryTerm) => `${t.short} ${t.analogy}`)
   for (const f of facts) add(f.section, [f])
   for (const s of sections) {

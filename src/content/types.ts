@@ -26,6 +26,11 @@ export interface Meta {
   lastReviewed: string
   policyUrl: string
   copilotVersionNote: string
+  // Where the source lives, for the deck's last slide. The build prompt path is relative to it.
+  repoUrl: string
+  buildPrompt: string
+  // Public address of the guide for the "open it on your phone" QR code. Empty: use the current page.
+  siteUrl: string
 }
 
 export interface SectionInfo {
@@ -175,12 +180,120 @@ export interface MemoryLane {
 }
 
 // Plain-English definitions for people new to AI.
+export type TermGroup = 'ai' | 'copilot' | 'code'
+
 export interface GlossaryTerm extends Item {
-  // One line, used in tooltips and the term chips under each page intro.
+  group: TermGroup
+  // One line, used in tooltips, the term links on each page and the deck's "New word" notes.
   short: string
   analogy: string
-  // Words that mean a page's title or intro uses this term (matched at the start of a word, any case).
+  // Patterns that mean a piece of text uses this term: regular expressions, matched at the start
+  // of a word when they begin with a letter. Any case, unless caseSensitive is set.
   match: string[]
+  caseSensitive?: boolean
+}
+
+// ---------- Opening story ----------
+export interface Finding extends Item {
+  // The headline number, as shown: "56%".
+  figure: string
+  source: string
+}
+
+export interface Factor extends Item {
+  // The section that teaches this habit.
+  section: string
+}
+
+export interface Opening {
+  feature: string
+  then: Item[]
+  thenNote: string
+  research: Finding[]
+  catch: Finding[]
+  factors: Factor[]
+  handover: string
+}
+
+// ---------- Pictures and stories ----------
+// The shared set of illustrations, drawn in src/components/Illustrations.tsx.
+export type SceneId =
+  | 'desk'
+  | 'map'
+  | 'clock'
+  | 'rocket'
+  | 'fork'
+  | 'book'
+  | 'whiteboard'
+  | 'snowball'
+  | 'target'
+  | 'roles'
+  | 'keyboard'
+  | 'loop'
+  | 'scales'
+  | 'folder'
+  | 'chat'
+  | 'question'
+  | 'shield'
+  | 'cloud'
+  | 'flag'
+  | 'bulb'
+  | 'magnifier'
+  | 'broom'
+  | 'gauge'
+  | 'gate'
+  | 'terminal'
+  | 'branch'
+  | 'stack'
+  | 'sparkle'
+
+// Keyed by slide id. Teaching slides tell a two-line story; openers get a one-line hook.
+export interface SlideStory {
+  scene: SceneId
+  hook?: string
+  // What Asha does and what it gains (the habit).
+  helps?: string
+  // What Ben does and what it costs (the trap).
+  wrong?: string
+}
+
+export interface ThenNow {
+  scenarios: { id: 'before' | 'well' | 'careless'; label: string }[]
+  // Hours per scenario, in the same order as `scenarios`.
+  activities: { label: string; hours: number[] }[]
+  unit: string
+  verdict: string
+  note: string
+}
+
+export type StackKind = 'instructions' | 'history' | 'files' | 'tools' | 'prompt'
+
+export interface ContextStack {
+  kinds: { id: StackKind; label: string }[]
+  // Each request lists what rides along with it, in tokens (illustrative).
+  requests: { label: string; blocks: { kind: StackKind; tokens: number }[] }[]
+  note: string
+}
+
+export interface DailyLoop {
+  centre: string
+  // Short labels for the seven workflow steps; the last one closes the loop.
+  steps: string[]
+  back: string
+}
+
+export interface ApprovalGate {
+  ask: { title: string; body: string; command: string }
+  check: { title: string; body: string; options: string[] }
+  run: { title: string; body: string }
+  bypass: string
+}
+
+export interface Prefix {
+  key: string
+  name: string
+  does: string
+  example: string
 }
 
 export interface RequestFlow {

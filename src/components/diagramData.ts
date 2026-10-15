@@ -3,7 +3,9 @@ import { diagrams, promptCost } from '../content'
 import { ACTION_LABEL } from '../content/labels'
 import type { PromptScenario } from '../content/types'
 
-export type DiagramId = 'request' | 'snowball' | 'anatomy' | 'modes' | 'chat-flow' | 'memory'
+export type DiagramId = 'request' | 'snowball' | 'anatomy' | 'modes' | 'chat-flow' | 'memory' | 'then-now' | 'context-stack' | 'daily-loop' | 'approval' | 'prefixes'
+
+export const DIAGRAM_IDS: DiagramId[] = ['request', 'snowball', 'anatomy', 'modes', 'chat-flow', 'memory', 'then-now', 'context-stack', 'daily-loop', 'approval', 'prefixes']
 
 export interface CostRow {
   round: number
@@ -30,6 +32,11 @@ export const costTotal = (s: PromptScenario) => costRows(s).reduce((n, r) => n +
 
 export const formatTokens = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}k` : String(n))
 
+export const sum = (list: number[]) => list.reduce((n, x) => n + x, 0)
+
+// Hours for one scenario of the then-and-now diagram.
+export const scenarioHours = (i: number) => sum(diagrams.thenNow.activities.map((a) => a.hours[i]))
+
 // How many presses of → each diagram takes in the deck: one per row, card or column.
 export function diagramSteps(id: DiagramId): number {
   switch (id) {
@@ -47,6 +54,19 @@ export function diagramSteps(id: DiagramId): number {
       return diagrams.chatFlow.questions.length * 2 + 1
     case 'memory':
       return diagrams.memory.requests.length
+    case 'then-now':
+      // One bar per scenario, then the verdict.
+      return diagrams.thenNow.scenarios.length + 1
+    case 'context-stack':
+      return diagrams.contextStack.requests.length
+    case 'daily-loop':
+      // Each step, then the arrow back to the start.
+      return diagrams.dailyLoop.steps.length + 1
+    case 'approval':
+      // Ask, check, run, then the warning about skipping the gate.
+      return 4
+    case 'prefixes':
+      return diagrams.prefixes.length
   }
 }
 
@@ -71,5 +91,23 @@ export function diagramText(id: DiagramId): string[] {
       const m = diagrams.memory
       return [...m.requests, ...m.lanes.flatMap((l) => [l.label, ...l.files.map((f) => f.name)]), m.note]
     }
+    case 'then-now': {
+      const d = diagrams.thenNow
+      return [...d.scenarios.map((s, i) => `${s.label} ${scenarioHours(i)} ${d.unit}`), ...d.activities.map((a) => a.label), d.verdict, d.note]
+    }
+    case 'context-stack': {
+      const d = diagrams.contextStack
+      return [...d.kinds.map((k) => k.label), ...d.requests.map((r) => r.label), d.note]
+    }
+    case 'daily-loop': {
+      const d = diagrams.dailyLoop
+      return [d.centre, ...d.steps, d.back]
+    }
+    case 'approval': {
+      const d = diagrams.approvalGate
+      return [d.ask.title, d.ask.body, d.ask.command, d.check.title, d.check.body, ...d.check.options, d.run.title, d.run.body, d.bypass]
+    }
+    case 'prefixes':
+      return diagrams.prefixes.flatMap((p) => [p.key, p.name, p.does, p.example])
   }
 }

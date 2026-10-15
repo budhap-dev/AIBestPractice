@@ -13,10 +13,11 @@ html.presenting body {
   inset: 0;
   z-index: 70;
   color: var(--text);
+  /* The stage behind the slide, like the grey canvas around a slide in a presentation app. */
   --deck-bg:
-    radial-gradient(70vw 60vh at 92% -8%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
-    radial-gradient(60vw 50vh at -8% 108%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
-    var(--bg);
+    radial-gradient(70vw 60vh at 92% -8%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    radial-gradient(60vw 50vh at -8% 108%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
+    color-mix(in srgb, var(--text) 7%, var(--bg-base));
   background: var(--deck-bg);
   overflow: hidden;
   touch-action: pan-y;
@@ -86,12 +87,99 @@ html.presenting body {
   gap: 4px;
 }
 
-.presenter__select select {
-  height: 34px;
-  padding: 0 8px;
-  font-size: 0.85rem;
-  background: var(--surface);
+/* Design and transition pickers: one pill that sits with the icon buttons. */
+.presenter__pickers {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  margin-right: 4px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.presenter__select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding-left: 10px;
+  border-radius: 999px;
+  color: var(--text-2);
   cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.presenter__select + .presenter__select {
+  margin-left: 5px;
+}
+
+.presenter__select + .presenter__select::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--border);
+}
+
+.presenter__select:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.presenter__select:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.presenter__select svg {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.presenter__select-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+}
+
+.presenter__select select {
+  appearance: none;
+  height: 32px;
+  padding: 0 26px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.presenter__select select:focus {
+  outline: none;
+}
+
+.presenter__select option {
+  color: var(--text);
+  background: var(--surface);
+  font-weight: 400;
+}
+
+.presenter__chevron {
+  position: absolute;
+  right: 8px;
+  width: 14px;
+  height: 14px;
 }
 
 .presenter__exit {
@@ -209,17 +297,27 @@ html.presenting body {
 }
 
 .slide__frame {
-  width: min(calc(100cqw - 32px), calc((100cqh - 8px) * 16 / 9));
+  position: relative;
+  /* Leave room for the toolbar above and the controls below, like the canvas around a slide. */
+  width: min(calc(100cqw - 48px), calc((100cqh - 116px) * 16 / 9));
   aspect-ratio: 16 / 9;
   container: frame / inline-size;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--slide-bg);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 18px 50px -12px rgb(0 0 0 / 0.35);
 }
 
 .slide__inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   height: 100%;
-  padding: 6% 6% 5%;
+  padding: 3.6cqw 5cqw 4.6cqw;
   font-size: max(12px, 1.8cqw);
   line-height: 1.4;
   overflow-wrap: break-word;
@@ -266,7 +364,7 @@ html.presenting body {
   }
 
   .presenter__product,
-  .presenter__select,
+  .presenter__pickers,
   .presenter__left {
     display: none;
   }
@@ -610,7 +708,7 @@ html.presenting body {
 
 .slide__title {
   margin: 0;
-  font-size: 1.9em;
+  font-size: 1.75em;
   font-weight: 800;
   letter-spacing: -0.025em;
   line-height: 1.15;
@@ -1113,6 +1211,7 @@ html.presenting body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
   gap: 12px;
+  width: 100%;
   max-width: 1400px;
   margin: 0 auto;
   padding: 0;
@@ -1306,7 +1405,7 @@ html.presenting body {
 }
 
 .slide .dg-snow__rows {
-  gap: 0.45em;
+  gap: 0.35em;
 }
 
 .slide .dg-snow__row {
@@ -1332,7 +1431,7 @@ html.presenting body {
 }
 
 .slide .dg__note {
-  margin-top: 0.5em;
+  margin-top: 0.35em;
 }
 
 .slide--diagram .slide__diagram:has(.dg-anatomy),
@@ -1344,6 +1443,11 @@ html.presenting body {
 
 .slide .dg-memory .table-wrap {
   overflow: visible;
+}
+
+/* Table padding scales with the slide, so the diagram fits a small frame as well as a large one. */
+.slide .dg-memory :is(th, td) {
+  padding: 0.4em 0.7em;
 }
 
 .deck-facts {
@@ -1493,5 +1597,742 @@ html.presenting body {
   .frag.is-in {
     filter: none;
     transform: none;
+  }
+}
+
+/* ---------- Slide designs ----------
+   Like a presentation template: each design sets the slide background, a title accent and the footer.
+   Backgrounds stay close to the surface colour so text keeps its contrast in light and dark. */
+.presenter {
+  --slide-bg: var(--surface);
+}
+
+/* Classic: a clean slide with an accent bar along the top. */
+[data-design='classic'] .slide__frame::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.7cqw;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 35%, var(--slide-bg)));
+}
+
+[data-design='classic'] .slide__frame--section,
+[data-design='classic'] .slide__frame--title {
+  --slide-bg: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+
+/* Bold: a strong accent band down the left and a large shape in the corner. */
+[data-design='bold'] .slide__frame::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 1.6cqw;
+  background: var(--accent);
+}
+
+[data-design='bold'] .slide__frame::after {
+  content: '';
+  position: absolute;
+  right: -14cqw;
+  bottom: -22cqw;
+  width: 42cqw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+[data-design='bold'] .slide__frame--section::after,
+[data-design='bold'] .slide__frame--title::after {
+  right: -6cqw;
+  bottom: -10cqw;
+  width: 56cqw;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+[data-design='bold'] .slide__eyebrow {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.25em 0.7em;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+/* Paper: warm, lightly ruled, with a stitched border. */
+[data-design='paper'] .slide__frame {
+  --slide-bg: color-mix(in srgb, #f5e7c8 22%, var(--surface));
+  background:
+    repeating-linear-gradient(180deg, transparent 0 2.95cqw, color-mix(in srgb, var(--accent) 9%, transparent) 2.95cqw 3cqw),
+    var(--slide-bg);
+}
+
+[data-design='paper'] .slide__frame::before {
+  content: '';
+  position: absolute;
+  inset: 1.2cqw;
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+[data-design='paper'] .slide__title,
+[data-design='paper'] .slide__hero {
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  letter-spacing: -0.01em;
+}
+
+/* Blueprint: a fine grid with corner marks. */
+[data-design='blueprint'] .slide__frame {
+  --slide-bg: color-mix(in srgb, var(--accent) 4%, var(--surface));
+  background:
+    linear-gradient(color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px) 0 0 / 2.5cqw 2.5cqw,
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent) 1px, transparent 1px) 0 0 / 2.5cqw 2.5cqw,
+    var(--slide-bg);
+}
+
+[data-design='blueprint'] .slide__frame::before,
+[data-design='blueprint'] .slide__frame::after {
+  content: '';
+  position: absolute;
+  width: 4cqw;
+  height: 4cqw;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+}
+
+[data-design='blueprint'] .slide__frame::before {
+  top: 1.4cqw;
+  left: 1.4cqw;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+[data-design='blueprint'] .slide__frame::after {
+  right: 1.4cqw;
+  bottom: 1.4cqw;
+  border-left: 0;
+  border-top: 0;
+}
+
+[data-design='blueprint'] .slide__eyebrow,
+[data-design='blueprint'] .slide__foot {
+  font-family: var(--mono);
+}
+
+/* Spotlight: soft accent light from the corners. */
+[data-design='spotlight'] .slide__frame {
+  background:
+    radial-gradient(60% 70% at 100% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%),
+    radial-gradient(50% 60% at 0% 100%, color-mix(in srgb, var(--dg-5) 12%, transparent), transparent 70%),
+    var(--slide-bg);
+}
+
+/* ---------- Slide master: picture, footer, new words and story ---------- */
+.slide__art {
+  position: absolute;
+  z-index: 2;
+  top: 2.8cqw;
+  right: 4cqw;
+  width: 14cqw;
+  height: auto;
+  pointer-events: none;
+}
+
+.has-art .slide__head,
+.has-art > .newwords {
+  padding-right: 15cqw;
+}
+
+/* Cover-style slides: the picture is large and sits beside the words. */
+:is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement) .slide__art {
+  top: 50%;
+  right: 5cqw;
+  width: 30cqw;
+  translate: 0 -50%;
+}
+
+:is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement) .slide__inner {
+  padding-right: 38cqw;
+}
+
+.slide__frame--statement .has-art .slide__head {
+  padding-right: 0;
+}
+
+.slide__foot {
+  position: absolute;
+  z-index: 2;
+  left: 5cqw;
+  right: 5cqw;
+  bottom: 1.5cqw;
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  font-size: max(9px, 1cqw);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.newwords {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+  margin: -0.5em 0 0.8em;
+  font-size: 0.6em;
+}
+
+.newwords__label {
+  flex: none;
+  margin: 0;
+  font-size: 0.8em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.newwords ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em 0.45em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.newword {
+  max-width: 100%;
+  padding: 0.25em 0.65em;
+  border: 1px dashed color-mix(in srgb, var(--accent) 55%, var(--border));
+  border-radius: 0.5em;
+  background: color-mix(in srgb, var(--accent-soft) 75%, var(--slide-bg));
+}
+
+.newword dfn {
+  font-style: normal;
+  font-weight: 700;
+}
+
+.newword dfn::after {
+  content: ':';
+}
+
+.newword__short {
+  margin-left: 0.35em;
+  color: var(--text-2);
+}
+
+.slide__center .newwords,
+.divider .newwords {
+  margin: 0.7em 0 0;
+}
+
+.divider__hook {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 0.82em;
+  font-style: italic;
+  color: var(--text-2);
+}
+
+/* Asha and Ben: the story sits at the foot of every teaching slide, and the content centres above it. */
+.has-story > :first-child {
+  margin-top: auto;
+}
+
+/* The daily loop becomes a wide oval on a slide, so it spends width rather than height. */
+.dg-loop--wide .dg-loop__ring {
+  width: 100%;
+  aspect-ratio: 3.4;
+}
+
+.slide .dg-loop__centre {
+  inset: 34% 38%;
+  border-radius: 999px;
+}
+
+.slide .dg-loop__back {
+  margin-top: 0.4em;
+}
+
+/* The request flow on a slide: a little less air, so it fits with its new words and story. */
+.slide .dg-req__step {
+  padding: 0.7em 0.8em;
+}
+
+.slide .dg-req__loop {
+  margin-top: 0.6em;
+  padding: 0.35em 0.9em;
+}
+
+.slide .dg-req__packed {
+  gap: 0.2em;
+}
+
+.slide .dg-req__packed li {
+  padding-block: 0.12em;
+}
+
+/* Diagram slides need every line they can get. */
+.slide--diagram .slide__head {
+  margin-bottom: 0.9em;
+}
+
+/* Nothing on a slide may squash: a box that shrinks below its content spills over the story. */
+.slide__inner > * {
+  flex-shrink: 0;
+}
+
+.story {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.4em;
+  margin-top: auto;
+  padding-top: 1em;
+  font-size: 0.6em;
+  line-height: 1.35;
+}
+
+.story__side {
+  display: flex;
+  gap: 0.7em;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0.6em 0.9em;
+  border-radius: 0.6em;
+  border-left: 0.3em solid var(--c);
+  background: color-mix(in srgb, var(--c) 10%, var(--slide-bg));
+}
+
+.story__side--helps {
+  --c: var(--dg-3);
+}
+
+.story__side--wrong {
+  --c: var(--dg-2);
+}
+
+.story__label {
+  display: block;
+  margin-bottom: 0.1em;
+  font-size: 0.85em;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--good);
+}
+
+.story__side--wrong .story__label {
+  color: var(--bad);
+}
+
+.story .avatar {
+  flex: none;
+  width: 2.6em;
+  height: 2.6em;
+}
+
+/* ---------- Research figures ---------- */
+.deck-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12em), 1fr));
+  gap: 1em;
+}
+
+.deck-stat {
+  padding: 0.8em 1em;
+  border: 1px solid var(--border);
+  border-top: 0.25em solid var(--c);
+  border-radius: 0.5em;
+  background: var(--surface);
+}
+
+.deck-stats--up {
+  --c: var(--dg-3);
+  --figure: var(--good);
+}
+
+.deck-stats--down {
+  --c: var(--dg-2);
+  --figure: var(--bad);
+}
+
+.deck-stat .deck-stat__figure {
+  margin: 0;
+  font-size: 2.2em;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--figure);
+}
+
+.deck-stat h3 {
+  margin: 0.2em 0 0.3em;
+  font-size: 0.85em;
+}
+
+.deck-stat p {
+  margin: 0;
+  font-size: 0.66em;
+  color: var(--text-2);
+}
+
+.deck-stat .deck-stat__source {
+  margin-top: 0.5em;
+  font-size: 0.56em;
+  color: var(--text-3);
+}
+
+/* ---------- Statement ---------- */
+.statement {
+  margin: 0;
+  padding: 0.1em 0 0.1em 0.7em;
+  max-width: 22ch;
+  border-left: 0.14em solid var(--accent);
+  font-size: 1.7em;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- The finale ---------- */
+.slide__frame--teaser {
+  --slide-bg: #07090c;
+  color: #f4f6f8;
+}
+
+.slide__frame--teaser::before,
+.slide__frame--teaser::after {
+  display: none;
+}
+
+.teaser .slide__eyebrow {
+  color: #9fb3c8;
+}
+
+.teaser__title {
+  max-width: none;
+  background: none;
+  color: #fff;
+  font-size: 4em;
+}
+
+.slide--enter .teaser__title {
+  animation: teaser-in 2.4s var(--ease-out) both;
+}
+
+@keyframes teaser-in {
+  from {
+    opacity: 0;
+    letter-spacing: 0.25em;
+    filter: blur(12px);
+  }
+}
+
+/* The finale's frame dissolves: the slide peels off and the app shows through. */
+.slide__frame--live {
+  --slide-bg: transparent;
+  box-shadow: none;
+  outline: 2px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: -2px;
+}
+
+.slide__frame--live::before,
+.slide__frame--live::after {
+  display: none;
+}
+
+.peel {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: 0 20px 60px -10px rgb(0 0 0 / 0.5);
+  transform-origin: 0 0;
+  pointer-events: none;
+  animation: peel 1.8s cubic-bezier(0.55, 0, 0.3, 1) 0.4s both;
+}
+
+.peel::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  aspect-ratio: 1;
+  background: linear-gradient(315deg, var(--deck-bg-flat, transparent) 50%, color-mix(in srgb, var(--text) 18%, var(--surface)) 50%, var(--surface-2));
+  box-shadow: -6px -6px 18px rgb(0 0 0 / 0.2);
+  animation: curl 1.8s cubic-bezier(0.55, 0, 0.3, 1) 0.4s both;
+}
+
+.peel__title {
+  font-size: max(24px, 5.4cqw);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+@keyframes peel {
+  0%,
+  25% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-12%, 110%) rotate(-24deg);
+    opacity: 0;
+  }
+}
+
+@keyframes curl {
+  0% {
+    width: 0;
+  }
+  25% {
+    width: 22cqw;
+  }
+  100% {
+    width: 40cqw;
+  }
+}
+
+.live-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8em;
+  margin: 0.4em 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.live-stat {
+  display: grid;
+  gap: 0.1em;
+  padding: 0.7em 1em;
+  border: 1px solid var(--border);
+  border-radius: 0.6em;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.live-stat strong {
+  font-size: 2.2em;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.live-stat > span {
+  font-size: 0.7em;
+  color: var(--text-2);
+}
+
+.live-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.6em;
+  align-items: center;
+  font-size: 0.7em;
+}
+
+.live-controls fieldset {
+  margin: 0 0 0.9em;
+  padding: 0;
+  border: 0;
+}
+
+.live-controls legend,
+.live-controls__selects span {
+  display: block;
+  margin-bottom: 0.35em;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.live-controls__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+}
+
+.live-controls .swatch,
+.live-controls .seg button,
+.live-controls select {
+  font-size: 0.85em;
+}
+
+.live-controls__selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+}
+
+.live-controls select {
+  min-width: 9em;
+  padding: 0.35em 0.5em;
+}
+
+.live-controls__qr,
+.prompt-finale__qr {
+  display: grid;
+  justify-items: center;
+  gap: 0.4em;
+  margin: 0;
+  text-align: center;
+}
+
+.live-controls__qr .qr {
+  width: 11em;
+}
+
+.live-controls__qr figcaption,
+.prompt-finale__qr figcaption {
+  max-width: 12em;
+  font-size: 0.8em;
+  color: var(--text-2);
+}
+
+.qr {
+  display: block;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.prompt-finale {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2em;
+  align-items: center;
+}
+
+.prompt-finale__link {
+  font-size: 0.75em;
+}
+
+.prompt-finale__url {
+  margin: 0.5em 0 0;
+  font-family: var(--mono);
+  font-size: 0.55em;
+  color: var(--text-3);
+  overflow-wrap: anywhere;
+}
+
+.prompt-finale__qr .qr {
+  width: 10em;
+}
+
+.prompt-finale__qr figcaption {
+  font-size: 0.6em;
+}
+
+/* Phones and portrait windows: the slide fills the screen, so the picture shrinks and the story stacks. */
+@media (max-aspect-ratio: 1/1), (max-width: 640px) {
+  .slide__frame {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .slide__art,
+  :is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement) .slide__art {
+    top: 56px;
+    right: 12px;
+    width: 22cqw;
+    translate: none;
+  }
+
+  :is(.slide__frame--title, .slide__frame--section, .slide__frame--end, .slide__frame--statement) .slide__inner {
+    padding-right: 16px;
+  }
+
+  .has-art .slide__head,
+  .has-art > .newwords,
+  .slide__center {
+    padding-right: 20cqw;
+  }
+
+  /* Repeated here because the grid rules for these come later in the file and would win. */
+  .deck-cards,
+  .deck-compare,
+  .deck-stats,
+  .deck-table__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .story,
+  .live-stats,
+  .live-controls,
+  .prompt-finale {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .slide__foot {
+    display: none;
+  }
+
+  .teaser__title {
+    font-size: 2.6em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peel {
+    display: none;
+  }
+
+  .slide--enter .teaser__title {
+    animation: none;
+  }
+}
+
+/* ---------- Short talk ---------- */
+.overview__note {
+  max-width: 1400px;
+  margin: -8px auto 14px;
+  font-size: 0.9rem;
+  color: var(--text-2);
+}
+
+/* Slides the short talk skips stay in the overview, quieter, one click from the full deck. */
+.overview__card.is-skipped {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-2);
+}
+
+.overview__card.is-skipped .overview__title {
+  font-weight: 500;
+}
+
+.overview__card.is-skipped:hover {
+  color: var(--text);
+}
+
+.overview__full {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* Mid-size windows: the pickers drop their icons and the bar drops the product name, keeping the section. */
+@media (max-width: 1000px) {
+  .presenter__select-icon,
+  .presenter__product {
+    display: none;
+  }
+
+  .presenter__section::before {
+    content: none;
   }
 }
